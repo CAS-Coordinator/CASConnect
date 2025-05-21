@@ -266,8 +266,8 @@ init() {
             if (document.getElementById('strandChart') && document.getElementById('cityChart')) {
                 this.setupCharts();
                 setTimeout(() => {
-                    this.applyFilters(); // Delay applyFilters
-                }, 200); // Additional delay
+                    this.applyFilters(); // Further delay applyFilters
+                }, 500); // Increased to 500ms
             } else {
                 console.error("Chart canvas elements not found after timeout. Charts will not be initialized.");
             }
@@ -477,12 +477,7 @@ setupCharts() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: true, // Explicitly enable with minimal config
-                        position: 'bottom',
-                        labels: {
-                            font: { size: 14 },
-                            boxWidth: 20 // Avoid any sizing issues
-                        }
+                        display: false // Disable legend to bypass fullSize error
                     },
                     title: {
                         display: true,
@@ -492,7 +487,7 @@ setupCharts() {
                 }
             }
         });
-        console.log('Strand Chart Options:', JSON.stringify(this.strandChart.options, null, 2)); // Stringify for clearer output
+        console.log('Strand Chart Options:', JSON.stringify(this.strandChart.options, null, 2));
     } else {
         console.error("StrandChart canvas or context not available during setup.");
     }
@@ -517,7 +512,7 @@ setupCharts() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false // Already disabled, keep it off
+                        display: false
                     },
                     title: {
                         display: true,
@@ -534,59 +529,63 @@ setupCharts() {
                 }
             }
         });
-        console.log('City Chart Options:', JSON.stringify(this.cityChart.options, null, 2)); // Stringify for clearer output
+        console.log('City Chart Options:', JSON.stringify(this.cityChart.options, null, 2));
     } else {
         console.error("CityChart canvas or context not available during setup.");
     }
 },
 
-        updateCharts() {
-            if (!this.strandChart || !this.strandChart.canvas || !this.cityChart || !this.cityChart.canvas) {
-                console.warn("Charts or their canvas not fully initialized yet, skipping update.");
-                return;
-            }
+updateCharts() {
+    if (!this.strandChart || !this.strandChart.canvas || !this.cityChart || !this.cityChart.canvas) {
+        console.warn("Charts or their canvas not fully initialized yet, skipping update.");
+        return;
+    }
 
-            const activitiesToChart = this.filteredActivities.length > 0 ? this.filteredActivities : this.activities;
+    const activitiesToChart = this.filteredActivities.length > 0 ? this.filteredActivities : this.activities;
 
-            // Update Pie Chart (Activities by Strand)
-            const strandCounts = {
-                Creativity: 0,
-                Activity: 0,
-                Service: 0,
-                'Cross-Strand': 0
-            };
-            activitiesToChart.forEach(act => {
-                const strand = act.strands.length > 1 ? 'Cross-Strand' : act.primaryStrand;
-                if (strandCounts[strand] !== undefined) {
-                    strandCounts[strand]++;
-                }
-            });
+    // Update Pie Chart (Activities by Strand)
+    const strandCounts = {
+        Creativity: 0,
+        Activity: 0,
+        Service: 0,
+        'Cross-Strand': 0
+    };
+    activitiesToChart.forEach(act => {
+        const strand = act.strands.length > 1 ? 'Cross-Strand' : act.primaryStrand;
+        if (strandCounts[strand] !== undefined) {
+            strandCounts[strand]++;
+        }
+    });
 
-            if (this.strandChart) {
-                this.strandChart.data.datasets[0].data = [
-                    strandCounts.Creativity,
-                    strandCounts.Activity,
-                    strandCounts.Service,
-                    strandCounts['Cross-Strand']
-                ];
-                this.strandChart.update();
-            }
+    if (this.strandChart) {
+        this.strandChart.data.datasets[0].data = [
+            strandCounts.Creativity,
+            strandCounts.Activity,
+            strandCounts.Service,
+            strandCounts['Cross-Strand']
+        ];
+        console.log('Updating Strand Chart with data:', strandCounts);
+        this.strandChart.update();
+    }
 
-            // Update Bar Chart (Activities by City)
-            const cityCounts = activitiesToChart.reduce((acc, act) => {
-                acc[act.city] = (acc[act.city] || 0) + 1;
-                return acc;
-            }, {});
-            const sortedCities = Object.entries(cityCounts)
-                .sort(([, a], [, b]) => b - a)
-                .slice(0, 10);
+    // Temporarily disable City Chart update to isolate the issue
+    /*
+    const cityCounts = activitiesToChart.reduce((acc, act) => {
+        acc[act.city] = (acc[act.city] || 0) + 1;
+        return acc;
+    }, {});
+    const sortedCities = Object.entries(cityCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10);
 
-            if (this.cityChart) {
-                this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
-                this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
-                this.cityChart.update();
-            }
-        } // Ensure proper closing brace
+    if (this.cityChart) {
+        this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
+        this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
+        console.log('Updating City Chart with data:', sortedCities);
+        this.cityChart.update();
+    }
+    */
+}
     }; // Ensure proper closing brace for casApp object
 } // Ensure proper closing brace for casApp function
 </script>
