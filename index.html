@@ -24,8 +24,6 @@
         .modal-content::-webkit-scrollbar-thumb { background: #0D9488; border-radius: 10px; }
         .modal-content::-webkit-scrollbar-thumb:hover { background: #0F766E; }
         [x-cloak] { display: none !important; }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .accordion-content.open { max-height: 1000px; /* Adjust as needed */ transition: max-height 0.5s ease-in; }
     </style>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
@@ -39,9 +37,7 @@
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="#home" @click="setActiveSection('home')" :class="{ 'active': activeSection === 'home' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Home</a>
-                        <a href="#understanding-cas" @click="setActiveSection('understanding-cas')" :class="{ 'active': activeSection === 'understanding-cas' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Understanding CAS</a>
                         <a href="#find-activities" @click="setActiveSection('find-activities')" :class="{ 'active': activeSection === 'find-activities' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Find Activities</a>
-                        <a href="#maximize-cas" @click="setActiveSection('maximize-cas')" :class="{ 'active': activeSection === 'maximize-cas' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Maximize CAS</a>
                         <a href="#resources" @click="setActiveSection('resources')" :class="{ 'active': activeSection === 'resources' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Resources</a>
                     </div>
                 </div>
@@ -61,9 +57,7 @@
         <div x-show="mobileMenuOpen" x-cloak class="md:hidden" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="#home" @click="setActiveSection('home'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Home</a>
-                <a href="#understanding-cas" @click="setActiveSection('understanding-cas'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Understanding CAS</a>
                 <a href="#find-activities" @click="setActiveSection('find-activities'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Find Activities</a>
-                <a href="#maximize-cas" @click="setActiveSection('maximize-cas'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Maximize CAS</a>
                 <a href="#resources" @click="setActiveSection('resources'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Resources</a>
             </div>
         </div>
@@ -74,60 +68,6 @@
             <h2 class="text-3xl font-bold text-teal-700 mb-4">Welcome to the CAS Activity Explorer!</h2>
             <p class="text-lg text-gray-700 mb-3">This tool is designed to help high school students, especially those in the IB Diploma Programme, find Creativity, Activity, Service (CAS) opportunities in the Numazu, Mishima, and Fuji City areas for <strong class="text-teal-600">June and July 2025</strong>.</p>
             <p class="text-gray-600">Our goal is to provide a starting point for your CAS journey. We encourage you to explore these options, take initiative, and find experiences that are meaningful, challenging, and contribute to your personal growth. Remember, CAS is more than a checklist; it's an opportunity to develop and learn.</p>
-        </section>
-
-        <section id="understanding-cas" class="py-8 md:py-12">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Understanding CAS</h2>
-            <div class="space-y-4 max-w-3xl mx-auto">
-                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-teal-700">What are the Three Strands of CAS?</h3>
-                        <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
-                        <p class="mb-2">CAS is structured around three interconnected strands:</p>
-                        <ul class="list-disc list-inside space-y-1">
-                            <li><strong>🎨 Creativity:</strong> Exploring and extending ideas leading to an original or interpretive product or performance. Examples: visual arts, music, drama, design, creative writing.</li>
-                            <li><strong>🏃 Activity:</strong> Physical exertion contributing to a healthy lifestyle. Examples: sports, dance, hiking, martial arts.</li>
-                            <li><strong>🤝 Service:</strong> Collaborative and reciprocal engagement with the community in response to an authentic need (unpaid and voluntary). Examples: volunteering, community projects, environmental conservation.</li>
-                        </ul>
-                    </div>
-                </div>
-                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-teal-700">Key Elements of a Successful CAS Experience</h3>
-                         <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
-                        <ul class="list-disc list-inside space-y-1">
-                            <li>Clear Goals & Achievable Outcomes</li>
-                            <li>Personal Challenge & Pushing Boundaries</li>
-                            <li>Planning and Initiative</li>
-                            <li>Collaboration</li>
-                            <li>Commitment and Perseverance</li>
-                            <li>Ongoing Reflection</li>
-                            <li>Ethical Considerations</li>
-                        </ul>
-                    </div>
-                </div>
-                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-teal-700">The Seven CAS Learning Outcomes</h3>
-                        <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
-                        <ol class="list-decimal list-inside space-y-1">
-                            <li>Identify own strengths and develop areas for growth.</li>
-                            <li>Demonstrate that challenges have been undertaken, developing new skills.</li>
-                            <li>Demonstrate how to initiate and plan a CAS experience.</li>
-                            <li>Show commitment to and perseverance in CAS experiences.</li>
-                            <li>Demonstrate the skills and recognize the benefits of working collaboratively.</li>
-                            <li>Demonstrate engagement with issues of global significance.</li>
-                            <li>Recognize and consider the ethics of choices and actions.</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
         </section>
 
         <section id="find-activities" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -268,48 +208,6 @@
                 </div>
             </div>
         </div>
-
-        <section id="maximize-cas" class="py-8 md:py-12">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Maximizing Your CAS Experience</h2>
-            <div class="space-y-4 max-w-3xl mx-auto">
-                 <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-teal-700">Student Initiative: Beyond the List</h3>
-                        <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
-                        <p>This explorer is a starting point. The most impactful CAS experiences often come from your own initiative. Identify needs, pursue personal interests, and even create your own unique experiences. Discuss ideas with your CAS Coordinator.</p>
-                    </div>
-                </div>
-                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-teal-700">The Crucial Role of Reflection</h3>
-                        <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
-                        <p>Reflection transforms activity into learning. Reflect before (goals, challenges), during (feelings, skills, observations), and after (what was learned, impact, improvements). Ask yourself: What did I learn? How did I grow? What skills did I develop?</p>
-                    </div>
-                </div>
-                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-teal-700">Documenting Experiences & Gathering Evidence</h3>
-                         <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
-                        <p>Maintain a CAS portfolio or journal. Include written reflections, photos, videos, products created, testimonials, or certificates. For ongoing experiences, include multiple reflections and pieces of evidence.</p>
-                    </div>
-                </div>
-                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-teal-700">Ethical Considerations in Action</h3>
-                         <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
-                        <p>Act with integrity, honesty, and fairness. Respect the dignity and rights of all involved. Ensure service addresses authentic needs and is culturally sensitive and beneficial. Consider environmental and social impacts.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <section id="resources" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Further Resources & Next Steps</h2>
