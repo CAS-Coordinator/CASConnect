@@ -263,11 +263,15 @@ function casApp() {
             this.loadActivities(); 
 
             this.$nextTick(() => {
-                this.setupCharts();
-                // Further defer the first applyFilters call to give browser more time
+                // Defer all chart operations until DOM is hopefully fully settled
                 setTimeout(() => {
-                    this.applyFilters(); 
-                }, 50); // Small delay, e.g., 50ms
+                    if (document.getElementById('strandChart') && document.getElementById('cityChart')) {
+                        this.setupCharts();  // Creates chart instances
+                        this.applyFilters(); // Populates data and calls .update()
+                    } else {
+                        console.error("Chart canvas elements not found after timeout. Charts will not be initialized.");
+                    }
+                }, 100); // Increased delay slightly
 
                 const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
                 const observer = new IntersectionObserver((entries) => {
@@ -283,9 +287,14 @@ function casApp() {
                     const hash = window.location.hash.substring(1);
                     if (hash) this.setActiveSection(hash);
                 });
-                if (window.location.hash) {
-                    this.setActiveSection(window.location.hash.substring(1));
-                }
+                // Set initial section after a tick to ensure elements are available for scrolling
+                this.$nextTick(() => {
+                    if (window.location.hash) {
+                        this.setActiveSection(window.location.hash.substring(1));
+                    } else {
+                        this.setActiveSection('home'); // Default section
+                    }
+                });
             });
         },
 
@@ -443,33 +452,42 @@ function casApp() {
         },
 
         setupCharts() {
+            // Destroy existing charts if they exist, to prevent issues on re-init attempts
+            if (this.strandChart) {
+                this.strandChart.destroy();
+                this.strandChart = null;
+            }
+            if (this.cityChart) {
+                this.cityChart.destroy();
+                this.cityChart = null;
+            }
+
             const strandCtx = document.getElementById('strandChart');
-            if (strandCtx) { 
-                if (this.strandChart) { this.strandChart.destroy(); } 
+            if (strandCtx && strandCtx.getContext) {
                 this.strandChart = new Chart(strandCtx.getContext('2d'), {
                     type: 'pie',
                     data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3'] }] },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
                 });
             } else {
-                console.error("Canvas element with ID 'strandChart' not found during setup.");
+                console.error("StrandChart canvas or context not available during setup.");
             }
 
             const cityCtx = document.getElementById('cityChart');
-            if (cityCtx) { 
-                if (this.cityChart) { this.cityChart.destroy(); } 
+            if (cityCtx && cityCtx.getContext) {
                 this.cityChart = new Chart(cityCtx.getContext('2d'), {
                     type: 'bar',
                     data: { labels: [], datasets: [{ label: 'Activities', data: [], backgroundColor: '#67E8F9' }] },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                 });
             } else {
-                console.error("Canvas element with ID 'cityChart' not found during setup.");
+                console.error("CityChart canvas or context not available during setup.");
             }
         },
 
         updateCharts() {
-            if (!this.strandChart || !this.cityChart) {
+            if (!this.strandChart || !this.strandChart.canvas || !this.cityChart || !this.cityChart.canvas) {
+                // console.warn("Charts or their canvas not fully initialized yet, skipping update.");
                 return;
             }
 
@@ -503,4 +521,4 @@ function casApp() {
 }
 </script>
 </body>
-</html>
+</ht
