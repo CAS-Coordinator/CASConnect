@@ -362,38 +362,40 @@ function casApp() {
         cityChart: null,
 
         init() {
-            this.loadActivities();
-            this.applyFilters(); 
-            this.setupCharts();
+            this.loadActivities(); // Load data first
 
-            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        this.activeSection = entry.target.id;
-                    }
-                });
-            }, observerOptions);
-            document.querySelectorAll('main section').forEach(section => observer.observe(section));
+            // Defer DOM-dependent initializations until Alpine has processed the initial DOM
+            this.$nextTick(() => {
+                this.setupCharts();    // Initialize chart instances
+                this.applyFilters();   // Apply initial filters and update charts
+
+                const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            this.activeSection = entry.target.id;
+                        }
+                    });
+                }, observerOptions);
+                document.querySelectorAll('main section').forEach(section => observer.observe(section));
             
-            window.addEventListener('hashchange', () => {
-                const hash = window.location.hash.substring(1);
-                if (hash) this.setActiveSection(hash);
+                window.addEventListener('hashchange', () => {
+                    const hash = window.location.hash.substring(1);
+                    if (hash) this.setActiveSection(hash);
+                });
+                if (window.location.hash) {
+                    this.setActiveSection(window.location.hash.substring(1));
+                }
             });
-            if (window.location.hash) {
-                 this.setActiveSection(window.location.hash.substring(1));
-            }
         },
 
         setActiveSection(sectionId) {
             this.activeSection = sectionId;
             const element = document.getElementById(sectionId);
             if (element) {
-                // element.scrollIntoView({ behavior: 'smooth' }); // Can be jumpy with fixed header
-                // Instead, adjust scroll position to account for fixed header
                 const headerOffset = document.querySelector('header').offsetHeight;
                 const elementPosition = element.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 10; // 10px buffer
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 10; 
                 window.scrollTo({
                      top: offsetPosition,
                      behavior: "smooth"
@@ -541,25 +543,33 @@ function casApp() {
         },
 
         setupCharts() {
-            const strandCtx = document.getElementById('strandChart').getContext('2d');
-            this.strandChart = new Chart(strandCtx, {
-                type: 'pie',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3'] }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-            });
+            const strandCtx = document.getElementById('strandChart');
+            if (strandCtx) { // Check if element exists
+                this.strandChart = new Chart(strandCtx.getContext('2d'), {
+                    type: 'pie',
+                    data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3'] }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            } else {
+                console.error("Canvas element with ID 'strandChart' not found during setup.");
+            }
 
-            const cityCtx = document.getElementById('cityChart').getContext('2d');
-            this.cityChart = new Chart(cityCtx, {
-                type: 'bar',
-                data: { labels: [], datasets: [{ label: 'Activities', data: [], backgroundColor: '#67E8F9' }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-            this.updateCharts();
+            const cityCtx = document.getElementById('cityChart');
+            if (cityCtx) { // Check if element exists
+                this.cityChart = new Chart(cityCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ label: 'Activities', data: [], backgroundColor: '#67E8F9' }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                });
+            } else {
+                console.error("Canvas element with ID 'cityChart' not found during setup.");
+            }
+            // Do not call updateCharts() here directly; let applyFilters handle the first update.
         },
 
         updateCharts() {
-            // Guard clause to prevent errors if charts are not yet initialized
             if (!this.strandChart || !this.cityChart) {
+                // console.warn("Charts not initialized or canvas not found, skipping update.");
                 return;
             }
 
@@ -578,7 +588,7 @@ function casApp() {
                 acc[act.city] = (acc[act.city] || 0) + 1;
                 return acc;
             }, {});
-            const sortedCities = Object.entries(cityCounts).sort(([,a],[,b]) => b-a).slice(0,10); // Top 10 cities
+            const sortedCities = Object.entries(cityCounts).sort(([,a],[,b]) => b-a).slice(0,10); 
             this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
             this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
             this.cityChart.update();
