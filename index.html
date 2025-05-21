@@ -486,14 +486,18 @@ function casApp() {
         },
 
 updateCharts() {
-    // ---- STRAND CHART ----
+    // STRAND CHART
     if (this.strandChart) {
         this.strandChart.destroy();
         this.strandChart = null;
+        const canvas = document.getElementById('strandChart');
+        if (canvas) canvas.width = canvas.width;
     }
     const strandCanvas = document.getElementById('strandChart');
     const strandCtx = strandCanvas ? strandCanvas.getContext('2d') : null;
-    if (!strandCtx) {
+    console.log('strandCanvas:', strandCanvas, 'strandCtx:', strandCtx);
+
+    if (!strandCanvas || !strandCtx) {
         console.error('Strand chart canvas or context not found!');
         return;
     }
@@ -504,9 +508,8 @@ updateCharts() {
         acc[strand] = (acc[strand] || 0) + 1;
         return acc;
     }, {});
-    if (Object.keys(strandCounts).length === 0) {
-        strandCounts = { 'No Data': 1 };
-    }
+    if (Object.keys(strandCounts).length === 0) strandCounts = { 'No Data': 1 };
+
     this.strandChart = new Chart(strandCtx, {
         type: 'pie',
         data: {
@@ -523,24 +526,28 @@ updateCharts() {
         }
     });
 
-    // ---- CITY CHART ----
+    // CITY CHART
     if (this.cityChart) {
         this.cityChart.destroy();
         this.cityChart = null;
+        const canvas = document.getElementById('cityChart');
+        if (canvas) canvas.width = canvas.width;
     }
     const cityCanvas = document.getElementById('cityChart');
     const cityCtx = cityCanvas ? cityCanvas.getContext('2d') : null;
-    if (!cityCtx) {
+    console.log('cityCanvas:', cityCanvas, 'cityCtx:', cityCtx);
+
+    if (!cityCanvas || !cityCtx) {
         console.error('City chart canvas or context not found!');
         return;
     }
+
     let cityCounts = strandData.reduce((acc, act) => {
         acc[act.city] = (acc[act.city] || 0) + 1;
         return acc;
     }, {});
-    if (Object.keys(cityCounts).length === 0) {
-        cityCounts = { 'No Data': 1 };
-    }
+    if (Object.keys(cityCounts).length === 0) cityCounts = { 'No Data': 1 };
+
     this.cityChart = new Chart(cityCtx, {
         type: 'bar',
         data: {
@@ -559,8 +566,7 @@ updateCharts() {
         }
     });
 }
-    };
-}
+
 </script>
 </body>
 </ht
