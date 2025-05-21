@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAS Activity Explorer - Numazu, Mishima, Fuji City</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -262,13 +262,20 @@ init() {
     this.loadActivities(); 
     this.$nextTick(() => {
         setTimeout(() => {
-            if (document.getElementById('strandChart') && document.getElementById('cityChart')) {
+            const strandCanvas = document.getElementById('strandChart');
+            const cityCanvas = document.getElementById('cityChart');
+            if (strandCanvas && cityCanvas && strandCanvas.offsetParent !== null && cityCanvas.offsetParent !== null) {
                 this.setupCharts();
                 setTimeout(() => {
-                    this.applyFilters(); // Further delay applyFilters
-                }, 1000); // Increased to 1000ms
+                    this.applyFilters();
+                }, 1000);
             } else {
-                console.error("Chart canvas elements not found after timeout. Charts will not be initialized.");
+                console.error("Chart canvas elements not found or not visible.", {
+                    strandCanvasExists: !!strandCanvas,
+                    cityCanvasExists: !!cityCanvas,
+                    strandCanvasVisible: strandCanvas && strandCanvas.offsetParent !== null,
+                    cityCanvasVisible: cityCanvas && cityCanvas.offsetParent !== null
+                });
             }
         }, 100);
         const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
@@ -459,7 +466,7 @@ setupCharts() {
 
     // Initialize Pie Chart for Activities by Strand
     const strandCtx = document.getElementById('strandChart');
-    if (strandCtx && strandCtx.getContext) {
+    if (strandCtx && strandCtx.getContext && strandCtx.offsetParent !== null) {
         this.strandChart = new Chart(strandCtx.getContext('2d'), {
             type: 'pie',
             data: {
@@ -476,18 +483,22 @@ setupCharts() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    title: { display: false } // Disable title plugin
+                    title: { display: false }
                 }
             }
         });
         console.log('Strand Chart Options:', JSON.stringify(this.strandChart.options, null, 2));
     } else {
-        console.error("StrandChart canvas or context not available during setup.");
+        console.error("StrandChart canvas not available or not visible during setup.", {
+            canvasExists: !!strandCtx,
+            contextAvailable: strandCtx && !!strandCtx.getContext,
+            isVisible: strandCtx && strandCtx.offsetParent !== null
+        });
     }
 
     // Initialize Bar Chart for Activities by City
     const cityCtx = document.getElementById('cityChart');
-    if (cityCtx && cityCtx.getContext) {
+    if (cityCtx && cityCtx.getContext && cityCtx.offsetParent !== null) {
         this.cityChart = new Chart(cityCtx.getContext('2d'), {
             type: 'bar',
             data: {
@@ -518,7 +529,11 @@ setupCharts() {
         });
         console.log('City Chart Options:', JSON.stringify(this.cityChart.options, null, 2));
     } else {
-        console.error("CityChart canvas or context not available during setup.");
+        console.error("CityChart canvas not available or not visible during setup.", {
+            canvasExists: !!cityCtx,
+            contextAvailable: cityCtx && !!cityCtx.getContext,
+            isVisible: cityCtx && cityCtx.offsetParent !== null
+        });
     }
 },
 
@@ -528,6 +543,10 @@ updateCharts() {
         return;
     }
 
+    if (!this.strandChart.chartArea) {
+        console.warn("StrandChart not fully initialized (missing chartArea), skipping update.");
+        return;
+    }
     if (!this.cityChart.chartArea) {
         console.warn("CityChart not fully initialized (missing chartArea), skipping update.");
         return;
@@ -535,47 +554,56 @@ updateCharts() {
 
     const activitiesToChart = this.filteredActivities.length > 0 ? this.filteredActivities : this.activities;
 
-    // Temporarily disable Strand Chart update
-    /*
-    const strandCounts = {
-        Creativity: 0,
-        Activity: 0,
-        Service: 0,
-        'Cross-Strand': 0
-    };
-    activitiesToChart.forEach(act => {
-        const strand = act.strands.length > 1 ? 'Cross-Strand' : act.primaryStrand;
-        if (strandCounts[strand] !== undefined) {
-            strandCounts[strand]++;
+    // Update Pie Chart (Activities by Strand)
+    try {
+        const strandCounts = {
+            Creativity: 0,
+            Activity: 0,
+            Service: 0,
+            'Cross-Strand': 0
+        };
+        activitiesToChart.forEach(act => {
+            const strand = act.strands.length > 1 ? 'Cross-Strand' : act.primaryStrand;
+            if (strandCounts[strand] !== undefined) {
+                strandCounts[strand]++;
+            }
+        });
+
+        if (this.strandChart) {
+            this.strandChart.data.datasets[0].data = [
+                strandCounts.Creativity,
+                strandCounts.Activity,
+                strandCounts.Service,
+                strandCounts['Cross-Strand']
+            ];
+            console.log('Updating Strand Chart with data:', strandCounts);
+            this.strandChart.update();
         }
-    });
-
-    if (this.strandChart) {
-        this.strandChart.data.datasets[0].data = [
-            strandCounts.Creativity,
-            strandCounts.Activity,
-            strandCounts.Service,
-            strandCounts['Cross-Strand']
-        ];
-        console.log('Updating Strand Chart with data:', strandCounts);
-        this.strandChart.update();
+    } catch (error) {
+        console.error('Error updating StrandChart:', error);
     }
-    */
 
-    // Update City Chart
-    const cityCounts = activitiesToChart.reduce((acc, act) => {
-        acc[act.city] = (acc[act.city] || 0) + 1;
-        return acc;
-    }, {});
-    const sortedCities = Object.entries(cityCounts)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 10);
+    // Update City Chart with simplified data
+    try {
+        const cityCounts = activitiesToChart.reduce((acc, act) => {
+            acc[act.city] = (acc[act.city] || 0) + 1;
+            return acc;
+        }, {});
+        const sortedCities = Object.entries(cityCounts)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 10);
 
-    if (this.cityChart) {
-        this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
-        this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
-        console.log('Updating City Chart with data:', sortedCities);
-        this.cityChart.update();
+        if (this.cityChart) {
+            // Simplify labels to avoid potential recursion
+            const labels = sortedCities.map(entry => String(entry[0]).substring(0, 20)); // Truncate labels
+            const data = sortedCities.map(entry => Number(entry[1]));
+            this.cityChart.data.labels = labels;
+            this.cityChart.data.datasets[0].data = data;
+            console.log('Updating City Chart with data:', { labels, data });
+            this.cityChart.update();
+        }
+    } catch (error) {
+        console.error('Error updating CityChart:', error);
     }
 }
     }; // Ensure proper closing brace for casApp object
