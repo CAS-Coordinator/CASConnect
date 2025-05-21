@@ -362,12 +362,14 @@ function casApp() {
         cityChart: null,
 
         init() {
-            this.loadActivities(); // Load data first
+            this.loadActivities(); 
 
-            // Defer DOM-dependent initializations until Alpine has processed the initial DOM
             this.$nextTick(() => {
-                this.setupCharts();    // Initialize chart instances
-                this.applyFilters();   // Apply initial filters and update charts
+                this.setupCharts();
+                // Further defer the first applyFilters call to give browser more time
+                setTimeout(() => {
+                    this.applyFilters(); 
+                }, 50); // Small delay, e.g., 50ms
 
                 const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
                 const observer = new IntersectionObserver((entries) => {
@@ -544,7 +546,8 @@ function casApp() {
 
         setupCharts() {
             const strandCtx = document.getElementById('strandChart');
-            if (strandCtx) { // Check if element exists
+            if (strandCtx) { 
+                if (this.strandChart) { this.strandChart.destroy(); } 
                 this.strandChart = new Chart(strandCtx.getContext('2d'), {
                     type: 'pie',
                     data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3'] }] },
@@ -555,7 +558,8 @@ function casApp() {
             }
 
             const cityCtx = document.getElementById('cityChart');
-            if (cityCtx) { // Check if element exists
+            if (cityCtx) { 
+                if (this.cityChart) { this.cityChart.destroy(); } 
                 this.cityChart = new Chart(cityCtx.getContext('2d'), {
                     type: 'bar',
                     data: { labels: [], datasets: [{ label: 'Activities', data: [], backgroundColor: '#67E8F9' }] },
@@ -564,12 +568,10 @@ function casApp() {
             } else {
                 console.error("Canvas element with ID 'cityChart' not found during setup.");
             }
-            // Do not call updateCharts() here directly; let applyFilters handle the first update.
         },
 
         updateCharts() {
             if (!this.strandChart || !this.cityChart) {
-                // console.warn("Charts not initialized or canvas not found, skipping update.");
                 return;
             }
 
@@ -580,18 +582,24 @@ function casApp() {
                 acc[strand] = (acc[strand] || 0) + 1;
                 return acc;
             }, {});
-            this.strandChart.data.labels = Object.keys(strandCounts);
-            this.strandChart.data.datasets[0].data = Object.values(strandCounts);
-            this.strandChart.update();
+            
+            if (this.strandChart) {
+                this.strandChart.data.labels = Object.keys(strandCounts);
+                this.strandChart.data.datasets[0].data = Object.values(strandCounts);
+                this.strandChart.update();
+            }
 
             const cityCounts = activitiesToChart.reduce((acc, act) => {
                 acc[act.city] = (acc[act.city] || 0) + 1;
                 return acc;
             }, {});
             const sortedCities = Object.entries(cityCounts).sort(([,a],[,b]) => b-a).slice(0,10); 
-            this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
-            this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
-            this.cityChart.update();
+            
+            if (this.cityChart) {
+                this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
+                this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
+                this.cityChart.update();
+            }
         }
     };
 }
