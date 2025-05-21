@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAS Activity Explorer - Numazu, Mishima, Fuji City</title>
-    // <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -267,7 +266,7 @@ init() {
                 this.setupCharts();
                 setTimeout(() => {
                     this.applyFilters(); // Further delay applyFilters
-                }, 500); // Increased to 500ms
+                }, 1000); // Increased to 1000ms
             } else {
                 console.error("Chart canvas elements not found after timeout. Charts will not be initialized.");
             }
@@ -476,14 +475,8 @@ setupCharts() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false // Disable legend to bypass fullSize error
-                    },
-                    title: {
-                        display: true,
-                        text: 'Activities by Strand',
-                        font: { size: 16 }
-                    }
+                    legend: { display: false },
+                    title: { display: false } // Disable title plugin
                 }
             }
         });
@@ -511,14 +504,8 @@ setupCharts() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
-                    title: {
-                        display: true,
-                        text: 'Activities by City',
-                        font: { size: 16 }
-                    }
+                    legend: { display: false },
+                    title: { display: true, text: 'Activities by City', font: { size: 16 } }
                 },
                 scales: {
                     y: {
@@ -538,6 +525,11 @@ setupCharts() {
 updateCharts() {
     if (!this.strandChart || !this.strandChart.canvas || !this.cityChart || !this.cityChart.canvas) {
         console.warn("Charts or their canvas not fully initialized yet, skipping update.");
+        return;
+    }
+
+    if (!this.strandChart.chartArea) {
+        console.warn("StrandChart not fully initialized (missing chartArea), skipping update.");
         return;
     }
 
@@ -568,7 +560,7 @@ updateCharts() {
         this.strandChart.update();
     }
 
-    // Temporarily disable City Chart update to isolate the issue
+    // Keep City Chart update commented out for now
     /*
     const cityCounts = activitiesToChart.reduce((acc, act) => {
         acc[act.city] = (acc[act.city] || 0) + 1;
