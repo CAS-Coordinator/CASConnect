@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -486,87 +485,38 @@ function casApp() {
             }
         },
 
-updateCharts() {
-    // STRAND CHART
-    if (this.strandChart) {
-        this.strandChart.destroy();
-        this.strandChart = null;
-        const canvas = document.getElementById('strandChart');
-        if (canvas) canvas.width = canvas.width;
-    }
-    const strandCanvas = document.getElementById('strandChart');
-    const strandCtx = strandCanvas ? strandCanvas.getContext('2d') : null;
-    console.log('strandCanvas:', strandCanvas, 'strandCtx:', strandCtx);
+        updateCharts() {
+            if (!this.strandChart || !this.strandChart.canvas || !this.cityChart || !this.cityChart.canvas) {
+                // console.warn("Charts or their canvas not fully initialized yet, skipping update.");
+                return;
+            }
 
-    if (!strandCanvas || !strandCtx) {
-        console.error('Strand chart canvas or context not found!');
-        return;
-    }
+            const activitiesToChart = this.filteredActivities.length > 0 ? this.filteredActivities : this.activities;
 
-    let strandData = this.filteredActivities.length > 0 ? this.filteredActivities : this.activities;
-    let strandCounts = strandData.reduce((acc, act) => {
-        const strand = act.strands.length > 1 ? 'Cross-Strand' : act.primaryStrand;
-        acc[strand] = (acc[strand] || 0) + 1;
-        return acc;
-    }, {});
-    if (Object.keys(strandCounts).length === 0) strandCounts = { 'No Data': 1 };
+            const strandCounts = activitiesToChart.reduce((acc, act) => {
+                const strand = act.strands.length > 1 ? 'Cross-Strand' : act.primaryStrand;
+                acc[strand] = (acc[strand] || 0) + 1;
+                return acc;
+            }, {});
+            
+            if (this.strandChart) {
+                this.strandChart.data.labels = Object.keys(strandCounts);
+                this.strandChart.data.datasets[0].data = Object.values(strandCounts);
+                this.strandChart.update();
+            }
 
-    this.strandChart = new Chart(strandCtx, {
-        type: 'pie',
-        data: {
-            labels: Object.keys(strandCounts),
-            datasets: [{
-                data: Object.values(strandCounts),
-                backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } }
+            const cityCounts = activitiesToChart.reduce((acc, act) => {
+                acc[act.city] = (acc[act.city] || 0) + 1;
+                return acc;
+            }, {});
+            const sortedCities = Object.entries(cityCounts).sort(([,a],[,b]) => b-a).slice(0,10); 
+            
+            if (this.cityChart) {
+                this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
+                this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
+                this.cityChart.update();
+            }
         }
-    });
-
-    // CITY CHART
-    if (this.cityChart) {
-        this.cityChart.destroy();
-        this.cityChart = null;
-        const canvas = document.getElementById('cityChart');
-        if (canvas) canvas.width = canvas.width;
-    }
-    const cityCanvas = document.getElementById('cityChart');
-    const cityCtx = cityCanvas ? cityCanvas.getContext('2d') : null;
-    console.log('cityCanvas:', cityCanvas, 'cityCtx:', cityCtx);
-
-    if (!cityCanvas || !cityCtx) {
-        console.error('City chart canvas or context not found!');
-        return;
-    }
-
-    let cityCounts = strandData.reduce((acc, act) => {
-        acc[act.city] = (acc[act.city] || 0) + 1;
-        return acc;
-    }, {});
-    if (Object.keys(cityCounts).length === 0) cityCounts = { 'No Data': 1 };
-
-    this.cityChart = new Chart(cityCtx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(cityCounts),
-            datasets: [{
-                label: 'Activities',
-                data: Object.values(cityCounts),
-                backgroundColor: '#67E8F9'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-        }
-    });
-}
     };
 }
 </script>
