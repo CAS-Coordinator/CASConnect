@@ -528,14 +528,15 @@ updateCharts() {
         return;
     }
 
-    if (!this.strandChart.chartArea) {
-        console.warn("StrandChart not fully initialized (missing chartArea), skipping update.");
+    if (!this.cityChart.chartArea) {
+        console.warn("CityChart not fully initialized (missing chartArea), skipping update.");
         return;
     }
 
     const activitiesToChart = this.filteredActivities.length > 0 ? this.filteredActivities : this.activities;
 
-    // Update Pie Chart (Activities by Strand)
+    // Temporarily disable Strand Chart update
+    /*
     const strandCounts = {
         Creativity: 0,
         Activity: 0,
@@ -559,9 +560,9 @@ updateCharts() {
         console.log('Updating Strand Chart with data:', strandCounts);
         this.strandChart.update();
     }
+    */
 
-    // Keep City Chart update commented out for now
-    /*
+    // Update City Chart
     const cityCounts = activitiesToChart.reduce((acc, act) => {
         acc[act.city] = (acc[act.city] || 0) + 1;
         return acc;
@@ -576,7 +577,6 @@ updateCharts() {
         console.log('Updating City Chart with data:', sortedCities);
         this.cityChart.update();
     }
-    */
 }
     }; // Ensure proper closing brace for casApp object
 } // Ensure proper closing brace for casApp function
