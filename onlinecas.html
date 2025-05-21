@@ -20,8 +20,6 @@
         .modal-content::-webkit-scrollbar-thumb { background: #0284C7; border-radius: 10px; } /* Soft Blue */
         .modal-content::-webkit-scrollbar-thumb:hover { background: #0369A1; }
         [x-cloak] { display: none !important; }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .accordion-content.open { max-height: 1000px; transition: max-height 0.5s ease-in; }
     </style>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
@@ -36,8 +34,7 @@
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="#home" @click="setActiveSection('home')" :class="{ 'active': activeSection === 'home' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-sky-600 border-b-2 border-transparent hover:border-sky-600">Home</a>
                         <a href="#find-activities" @click="setActiveSection('find-activities')" :class="{ 'active': activeSection === 'find-activities' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-sky-600 border-b-2 border-transparent hover:border-sky-600">Find Activities</a>
-                        <a href="#guidance" @click="setActiveSection('guidance')" :class="{ 'active': activeSection === 'guidance' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-sky-600 border-b-2 border-transparent hover:border-sky-600">Guidance</a>
-                    </div>
+                        </div>
                 </div>
                 <div class="md:hidden">
                     <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-sky-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-500" aria-controls="mobile-menu" aria-expanded="false">
@@ -56,15 +53,14 @@
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="#home" @click="setActiveSection('home'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-sky-600 hover:bg-gray-50">Home</a>
                 <a href="#find-activities" @click="setActiveSection('find-activities'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-sky-600 hover:bg-gray-50">Find Activities</a>
-                <a href="#guidance" @click="setActiveSection('guidance'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-sky-600 hover:bg-gray-50">Guidance</a>
-            </div>
+                </div>
         </div>
     </header>
 
     <main class="container mx-auto p-4 sm:p-6 lg:p-8">
         <section id="home" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
             <h2 class="text-3xl font-bold text-sky-700 mb-4">Online CAS Opportunities for Students in Japan</h2>
-            <p class="text-lg text-gray-700 mb-3">Welcome! This tool helps high school students in Japan find online Creativity, Activity, Service (CAS) opportunities, focusing on <strong class="text-sky-600">June and July 2025</strong>, as well as ongoing projects. The aim is to provide a reliable starting point for your CAS journey, aligning with the IB programme's standards.</p>
+            <p class="text-lg text-gray-700 mb-3">Welcome! This tool helps you find online Creativity, Activity, Service (CAS) opportunities, focusing on <strong class="text-sky-600">June and July 2025</strong>, as well as ongoing projects. The aim is to provide a reliable starting point for your CAS journey, aligning with the IB programme's standards.</p>
             <p class="text-gray-600">Online CAS activities are valuable for developing digital literacy, global awareness, and self-management. This explorer is designed to simplify your search for meaningful online engagements that foster personal growth and intercultural understanding. All information is based on the "Online CAS Opportunities for High School Students in Japan: June-July 2025" report.</p>
         </section>
 
@@ -192,53 +188,7 @@
             </div>
         </div>
 
-        <section id="guidance" class="py-8 md:py-12">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Guidance for Online CAS</h2>
-            <div class="space-y-4 max-w-3xl mx-auto">
-                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-sky-700">Tips for Students</h3>
-                        <svg :class="{'rotate-180': open}" class="w-5 h-5 text-sky-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600 text-sm">
-                        <ul class="list-disc list-inside space-y-1">
-                            <li>Align choices with genuine interests and passions.</li>
-                            <li>Define clear goals and ensure activities push your boundaries.</li>
-                            <li>Thoroughly document experiences: what was done, learned, challenges, and how LOs were met.</li>
-                            <li>Actively engage: ask questions, contribute, seek feedback.</li>
-                        </ul>
-                    </div>
-                </div>
-                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-sky-700">The Role of Reflection</h3>
-                         <svg :class="{'rotate-180': open}" class="w-5 h-5 text-sky-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600 text-sm">
-                        <p>Reflection is key for online CAS. Ask yourself: What did I learn? How did it challenge me? How did I grow? What skills did I develop? What could I have done differently? This helps connect actions to learning outcomes and understand your impact. Online CAS requires autonomy in planning, execution, and reflection.</p>
-                    </div>
-                </div>
-                 <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-sky-700">Balancing Screen Time & Well-being</h3>
-                         <svg :class="{'rotate-180': open}" class="w-5 h-5 text-sky-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600 text-sm">
-                        <p>Manage screen time by taking regular breaks, balancing online CAS with offline activities (especially for 'Activity'), and ensuring an ergonomic setup.</p>
-                    </div>
-                </div>
-                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
-                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
-                        <h3 class="text-lg font-semibold text-sky-700">Approaching the 'Activity' Strand Online</h3>
-                         <svg :class="{'rotate-180': open}" class="w-5 h-5 text-sky-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600 text-sm">
-                        <p>Participate in live-streamed fitness classes, use fitness apps for structured programs, or set personal physical challenges (e.g., virtual marathon). Document with evidence (app logs, photos) and reflect on physical exertion, commitment, and impact on lifestyle to meet the "physical exertion contributing to a healthy lifestyle" requirement.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+        </main>
 
     <footer class="bg-gray-800 text-white py-8 text-center">
         <div class="container mx-auto px-4">
@@ -331,7 +281,7 @@ function casAppOnline() {
                 { id: 'os7', name: 'Zooniverse: Planet Hunters NGTS', organization: 'Zooniverse Platform', dates: 'Ongoing', locationFocus: 'Global', cost: 'Free', strands: ['S'], primaryStrandSort: 'Service', description: 'Examine light curves from the Next-Generation Transit Survey (NGTS) to help identify potential exoplanets.', urlDeadline: 'https://www.zooniverse.org/projects/ajnorton/planet-hunters-ngts [27] Ongoing.', notesLOs: 'LO2, LO5, LO6. Contribution to astronomical research, data interpretation.' },
                 { id: 'os8', name: 'Zooniverse: Notes from Nature - Capture the Collections', organization: 'Zooniverse Platform', dates: 'Ongoing', locationFocus: 'Global', cost: 'Free', strands: ['S'], primaryStrandSort: 'Service', description: 'Transcribe historical records from museum collections (e.g., plant specimen labels, ledgers) to make data accessible for research.', urlDeadline: 'https://www.zooniverse.org/projects/md68135/notes-from-nature-labs [26, 27] Ongoing.', notesLOs: 'LO2, LO5, LO6. Contribution to biodiversity research, historical data preservation.' },
                 { id: 'os9', name: 'SciStarter: Globe at Night', organization: 'SciStarter / Globe at Night Program', dates: 'Ongoing', locationFocus: 'Global', cost: 'Free', strands: ['S'], primaryStrandSort: 'Service', description: 'Measure and report night sky brightness from your location to help monitor light pollution worldwide. Requires simple observations and online data submission.', urlDeadline: 'https://scistarter.org/globe-at-night [11] Ongoing.', notesLOs: 'LO3, LO6. Contribution to environmental science, awareness of light pollution.' },
-                { id: 'os10', name: 'SciStarter: iNaturalist', organization: 'SciStarter / iNaturalist Platform', dates: 'Ongoing', locationFocus: 'Global', cost: 'Free', strands: ['S', 'C', 'A'], primaryStrandSort: 'Service', description: 'Photograph and document local plants, animals, and fungi. Upload observations to the iNaturalist platform to contribute to global biodiversity data. Help identify others\' observations.', urlDeadline: 'https://scistarter.org/inaturalist or https://www.inaturalist.org [11, 28] Ongoing.', notesLOs: 'LO1, LO2, LO3, LO6. Biodiversity awareness, data contribution. *Activity if involving outdoor exploration.*' },
+                { id: 'os10', name: 'SciStarter: iNaturalist', organization: 'SciStarter / iNaturalist Platform', dates: 'Ongoing', locationFocus: 'Global', cost: 'Free', strands: ['S', 'C', 'A'], primaryStrandSort: 'Service', description: 'Photograph and document local plants, animals, and fungi. Upload observations to the iNaturalist platform to contribute to global biodiversity data. Help identify others\' observations.', urlDeadline: 'https://scistarter.org/inaturalist or https://www.inaturalist.org [11, 28] Ongoing.', notesLOs: 'LO1, LO2, LO3, LO6. Biodiversity awareness, scientific data contribution, identification skills. *Activity if involving outdoor exploration.*' },
                 { id: 'os11', name: 'UN Online Volunteers (General Platform)', organization: 'United Nations Volunteers', dates: 'Ongoing (Check assignments)', locationFocus: 'Global', cost: 'Free', strands: ['S'], primaryStrandSort: 'Service', description: 'Search for online volunteering assignments with UN agencies, NGOs, and governments. Tasks vary (translation, research, design, writing, etc.). *Note: Most UNV assignments are for 18+*.', urlDeadline: 'https://www.unv.org/become-volunteer/volunteer-online [29] Check for youth-specific opportunities.', notesLOs: 'LO2, LO3, LO4, LO5, LO6, LO7 (depending on task). Contribution to global development. *Verify age eligibility.*' }
             ];
              // Add an 'id' if it's missing, for Alpine's :key directive
