@@ -485,19 +485,25 @@ function casApp() {
             }
         },
 
-       updateCharts() {
-    // Strand Chart
+updateCharts() {
+    // ---- STRAND CHART ----
     if (this.strandChart) {
         this.strandChart.destroy();
+        this.strandChart = null;
     }
-    const strandCtx = document.getElementById('strandChart').getContext('2d');
+    const strandCanvas = document.getElementById('strandChart');
+    const strandCtx = strandCanvas ? strandCanvas.getContext('2d') : null;
+    if (!strandCtx) {
+        console.error('Strand chart canvas or context not found!');
+        return;
+    }
+
     let strandData = this.filteredActivities.length > 0 ? this.filteredActivities : this.activities;
     let strandCounts = strandData.reduce((acc, act) => {
         const strand = act.strands.length > 1 ? 'Cross-Strand' : act.primaryStrand;
         acc[strand] = (acc[strand] || 0) + 1;
         return acc;
     }, {});
-    // Fallback dummy data if empty
     if (Object.keys(strandCounts).length === 0) {
         strandCounts = { 'No Data': 1 };
     }
@@ -517,16 +523,21 @@ function casApp() {
         }
     });
 
-    // City Chart
+    // ---- CITY CHART ----
     if (this.cityChart) {
         this.cityChart.destroy();
+        this.cityChart = null;
     }
-    const cityCtx = document.getElementById('cityChart').getContext('2d');
+    const cityCanvas = document.getElementById('cityChart');
+    const cityCtx = cityCanvas ? cityCanvas.getContext('2d') : null;
+    if (!cityCtx) {
+        console.error('City chart canvas or context not found!');
+        return;
+    }
     let cityCounts = strandData.reduce((acc, act) => {
         acc[act.city] = (acc[act.city] || 0) + 1;
         return acc;
     }, {});
-    // Fallback dummy data if empty
     if (Object.keys(cityCounts).length === 0) {
         cityCounts = { 'No Data': 1 };
     }
