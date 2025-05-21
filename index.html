@@ -548,14 +548,17 @@ function casApp() {
             const strandCtx = document.getElementById('strandChart').getContext('2d');
             this.strandChart = new Chart(strandCtx, {
                 type: 'pie',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3'] }] },
+               data: { 
+                    labels: ['Loading'], 
+                    datasets: [{ data: [1], backgroundColor: ['#ECFCCB'] }] 
+                },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
 
             const cityCtx = document.getElementById('cityChart').getContext('2d');
             this.cityChart = new Chart(cityCtx, {
                 type: 'bar',
-                data: { labels: [], datasets: [{ label: 'Activities', data: [], backgroundColor: '#67E8F9' }] },
+                data: { labels: ['Loading'], datasets: [{ label: 'Activities', data: [1], backgroundColor: '#67E8F9' }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
             });
             // Initial update with all activities or empty if filters are immediately applied
