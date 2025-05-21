@@ -536,6 +536,7 @@ setupCharts() {
         console.error("CityChart canvas or context not available during setup.");
     }
 }
+        
         updateCharts() {
             if (!this.strandChart || !this.strandChart.canvas || !this.cityChart || !this.cityChart.canvas) {
                 console.warn("Charts or their canvas not fully initialized yet, skipping update.");
