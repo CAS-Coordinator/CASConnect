@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAS Activity Explorer - Numazu, Mishima, Fuji City</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 300px; max-height: 350px; }
@@ -121,19 +121,18 @@
                 </div>
             </div>
 
-            <div class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-gray-50 p-4 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2 text-center">Activities by Strand</h3>
-                    <div class="chart-container">
-                        <canvas id="strandChart"></canvas>
-                    </div>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2 text-center">Activities by City</h3>
-                    <div class="chart-container">
-                        <canvas id="cityChart"></canvas>
-                    </div>
-                </div>
+       <div class="mt-4">
+    <h3 class="text-lg font-semibold">Activities by Strand</h3>
+    <div style="width: 100%; max-width: 600px; height: 400px;">
+        <canvas id="strandChart"></canvas>
+    </div>
+</div>
+<div class="mt-4">
+    <h3 class="text-lg font-semibold">Activities by City</h3>
+    <div style="width: 100%; max-width: 600px; height: 400px;">
+        <canvas id="cityChart"></canvas>
+    </div>
+</div>
             </div>
             
             <div x-show="filteredActivities.length === 0" class="text-center py-10 text-gray-500">
@@ -263,15 +262,14 @@ function casApp() {
             this.loadActivities(); 
 
             this.$nextTick(() => {
-                // Defer all chart operations until DOM is hopefully fully settled
                 setTimeout(() => {
                     if (document.getElementById('strandChart') && document.getElementById('cityChart')) {
-                        this.setupCharts();  // Creates chart instances
-                        this.applyFilters(); // Populates data and calls .update()
+                        this.setupCharts();
+                        this.applyFilters();
                     } else {
                         console.error("Chart canvas elements not found after timeout. Charts will not be initialized.");
                     }
-                }, 100); // Increased delay slightly
+                }, 100);
 
                 const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
                 const observer = new IntersectionObserver((entries) => {
@@ -287,12 +285,11 @@ function casApp() {
                     const hash = window.location.hash.substring(1);
                     if (hash) this.setActiveSection(hash);
                 });
-                // Set initial section after a tick to ensure elements are available for scrolling
                 this.$nextTick(() => {
                     if (window.location.hash) {
                         this.setActiveSection(window.location.hash.substring(1));
                     } else {
-                        this.setActiveSection('home'); // Default section
+                        this.setActiveSection('home');
                     }
                 });
             });
@@ -306,8 +303,8 @@ function casApp() {
                 const elementPosition = element.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 10; 
                 window.scrollTo({
-                     top: offsetPosition,
-                     behavior: "smooth"
+                    top: offsetPosition,
+                    behavior: "smooth"
                 });
             }
         },
@@ -351,7 +348,7 @@ function casApp() {
             ];
         },
 
-        applyFilters() {
+applyFilters() {
             this.currentPage = 1;
             let tempActivities = this.activities;
 
@@ -371,7 +368,6 @@ function casApp() {
                 const monthNumber = this.filters.month === 'June' ? 6 : 7;
                 tempActivities = tempActivities.filter(act => {
                     const actDate = new Date(act.startDate);
-                    // Check if activity spans across months or starts in the selected month
                     if (act.dates.toLowerCase().includes('june') && this.filters.month === 'June') return true;
                     if (act.dates.toLowerCase().includes('july') && this.filters.month === 'July') return true;
                     return actDate.getUTCMonth() + 1 === monthNumber;
@@ -412,7 +408,7 @@ function casApp() {
             let endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
             
             if (endPage - startPage + 1 < maxPagesToShow) {
-                 startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
             }
 
             for (let i = startPage; i <= endPage; i++) {
@@ -452,7 +448,7 @@ function casApp() {
         },
 
         setupCharts() {
-            // Destroy existing charts if they exist, to prevent issues on re-init attempts
+            // Destroy existing charts to prevent memory leaks
             if (this.strandChart) {
                 this.strandChart.destroy();
                 this.strandChart = null;
@@ -462,23 +458,74 @@ function casApp() {
                 this.cityChart = null;
             }
 
+            // Initialize Pie Chart for Activities by Strand
             const strandCtx = document.getElementById('strandChart');
             if (strandCtx && strandCtx.getContext) {
                 this.strandChart = new Chart(strandCtx.getContext('2d'), {
                     type: 'pie',
-                    data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3'] }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                    data: {
+                        labels: ['Creativity', 'Activity', 'Service', 'Cross-Strand'],
+                        datasets: [{
+                            data: [0, 0, 0, 0],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                            borderColor: '#ffffff',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { size: 14 } }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Activities by Strand',
+                                font: { size: 16 }
+                            }
+                        }
+                    }
                 });
             } else {
                 console.error("StrandChart canvas or context not available during setup.");
             }
 
+            // Initialize Bar Chart for Activities by City
             const cityCtx = document.getElementById('cityChart');
             if (cityCtx && cityCtx.getContext) {
                 this.cityChart = new Chart(cityCtx.getContext('2d'), {
                     type: 'bar',
-                    data: { labels: [], datasets: [{ label: 'Activities', data: [], backgroundColor: '#67E8F9' }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Activities',
+                            data: [],
+                            backgroundColor: '#36A2EB',
+                            borderColor: '#ffffff',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: {
+                                display: true,
+                                text: 'Activities by City',
+                                font: { size: 16 }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 },
+                                title: { display: true, text: 'Number of Activities' }
+                            }
+                        }
+                    }
                 });
             } else {
                 console.error("CityChart canvas or context not available during setup.");
@@ -487,30 +534,45 @@ function casApp() {
 
         updateCharts() {
             if (!this.strandChart || !this.strandChart.canvas || !this.cityChart || !this.cityChart.canvas) {
-                // console.warn("Charts or their canvas not fully initialized yet, skipping update.");
+                console.warn("Charts or their canvas not fully initialized yet, skipping update.");
                 return;
             }
 
             const activitiesToChart = this.filteredActivities.length > 0 ? this.filteredActivities : this.activities;
 
-            const strandCounts = activitiesToChart.reduce((acc, act) => {
+            // Update Pie Chart (Activities by Strand)
+            const strandCounts = {
+                Creativity: 0,
+                Activity: 0,
+                Service: 0,
+                'Cross-Strand': 0
+            };
+            activitiesToChart.forEach(act => {
                 const strand = act.strands.length > 1 ? 'Cross-Strand' : act.primaryStrand;
-                acc[strand] = (acc[strand] || 0) + 1;
-                return acc;
-            }, {});
-            
+                if (strandCounts[strand] !== undefined) {
+                    strandCounts[strand]++;
+                }
+            });
+
             if (this.strandChart) {
-                this.strandChart.data.labels = Object.keys(strandCounts);
-                this.strandChart.data.datasets[0].data = Object.values(strandCounts);
+                this.strandChart.data.datasets[0].data = [
+                    strandCounts.Creativity,
+                    strandCounts.Activity,
+                    strandCounts.Service,
+                    strandCounts['Cross-Strand']
+                ];
                 this.strandChart.update();
             }
 
+            // Update Bar Chart (Activities by City)
             const cityCounts = activitiesToChart.reduce((acc, act) => {
                 acc[act.city] = (acc[act.city] || 0) + 1;
                 return acc;
             }, {});
-            const sortedCities = Object.entries(cityCounts).sort(([,a],[,b]) => b-a).slice(0,10); 
-            
+            const sortedCities = Object.entries(cityCounts)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 10);
+
             if (this.cityChart) {
                 this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
                 this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
