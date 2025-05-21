@@ -448,91 +448,94 @@ applyFilters() {
             return formatted;
         },
 
-        setupCharts() {
-            // Destroy existing charts to prevent memory leaks
-            if (this.strandChart) {
-                this.strandChart.destroy();
-                this.strandChart = null;
-            }
-            if (this.cityChart) {
-                this.cityChart.destroy();
-                this.cityChart = null;
-            }
+setupCharts() {
+    // Destroy existing charts to prevent memory leaks
+    if (this.strandChart) {
+        this.strandChart.destroy();
+        this.strandChart = null;
+    }
+    if (this.cityChart) {
+        this.cityChart.destroy();
+        this.cityChart = null;
+    }
 
-            // Initialize Pie Chart for Activities by Strand
-            const strandCtx = document.getElementById('strandChart');
-            if (strandCtx && strandCtx.getContext) {
-                this.strandChart = new Chart(strandCtx.getContext('2d'), {
-                    type: 'pie',
-                    data: {
-                        labels: ['Creativity', 'Activity', 'Service', 'Cross-Strand'],
-                        datasets: [{
-                            data: [0, 0, 0, 0],
-                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
-                            borderColor: '#ffffff',
-                            borderWidth: 1
-                        }]
+    // Initialize Pie Chart for Activities by Strand
+    const strandCtx = document.getElementById('strandChart');
+    if (strandCtx && strandCtx.getContext) {
+        this.strandChart = new Chart(strandCtx.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['Creativity', 'Activity', 'Service', 'Cross-Strand'],
+                datasets: [{
+                    data: [0, 0, 0, 0],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                    borderColor: '#ffffff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 14 } }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { font: { size: 14 } }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Activities by Strand',
-                                font: { size: 16 }
-                            }
-                        }
+                    title: {
+                        display: true,
+                        text: 'Activities by Strand',
+                        font: { size: 16 }
                     }
-                });
-            } else {
-                console.error("StrandChart canvas or context not available during setup.");
+                }
             }
+        });
+        // Add console.log here to inspect strandChart options
+        console.log('Strand Chart Options:', this.strandChart.options);
+    } else {
+        console.error("StrandChart canvas or context not available during setup.");
+    }
 
-            // Initialize Bar Chart for Activities by City
-            const cityCtx = document.getElementById('cityChart');
-            if (cityCtx && cityCtx.getContext) {
-                this.cityChart = new Chart(cityCtx.getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: 'Activities',
-                            data: [],
-                            backgroundColor: '#36A2EB',
-                            borderColor: '#ffffff',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            title: {
-                                display: true,
-                                text: 'Activities by City',
-                                font: { size: 16 }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { stepSize: 1 },
-                                title: { display: true, text: 'Number of Activities' }
-                            }
-                        }
+    // Initialize Bar Chart for Activities by City
+    const cityCtx = document.getElementById('cityChart');
+    if (cityCtx && cityCtx.getContext) {
+        this.cityChart = new Chart(cityCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Activities',
+                    data: [],
+                    backgroundColor: '#36A2EB',
+                    borderColor: '#ffffff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Activities by City',
+                        font: { size: 16 }
                     }
-                });
-            } else {
-                console.error("CityChart canvas or context not available during setup.");
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 },
+                        title: { display: true, text: 'Number of Activities' }
+                    }
+                }
             }
-        },
-
+        });
+        // Add console.log here to inspect cityChart options
+        console.log('City Chart Options:', this.cityChart.options);
+    } else {
+        console.error("CityChart canvas or context not available during setup.");
+    }
+}
         updateCharts() {
             if (!this.strandChart || !this.strandChart.canvas || !this.cityChart || !this.cityChart.canvas) {
                 console.warn("Charts or their canvas not fully initialized yet, skipping update.");
