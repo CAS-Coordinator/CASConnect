@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAS Activity Explorer - Numazu, Mishima, Fuji City</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 300px; max-height: 350px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; max-h:400px;} }
+        .nav-link { transition: color 0.3s ease, border-bottom-color 0.3s ease; }
+        .nav-link.active { border-bottom-color: #0D9488; color: #0D9488; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+        .tag { display: inline-block; padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 9999px; margin-right: 0.5rem; margin-bottom: 0.5rem; }
+        .tag-creativity { background-color: #ECFCCB; color: #4D7C0F; border: 1px solid #A3E635; }
+        .tag-activity { background-color: #CFFAFE; color: #0E7490; border: 1px solid #67E8F9; }
+        .tag-service { background-color: #FFE4E6; color: #BE123C; border: 1px solid #FDA4AF; }
+        /* Custom scrollbar for modal content */
+        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb { background: #0D9488; border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb:hover { background: #0F766E; }
+        [x-cloak] { display: none !important; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .accordion-content.open { max-height: 1000px; /* Adjust as needed */ transition: max-height 0.5s ease-in; }
+    </style>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-stone-100 text-gray-800" x-data="casApp()">
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-teal-700">CAS Explorer</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" @click="setActiveSection('home')" :class="{ 'active': activeSection === 'home' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Home</a>
+                        <a href="#understanding-cas" @click="setActiveSection('understanding-cas')" :class="{ 'active': activeSection === 'understanding-cas' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Understanding CAS</a>
+                        <a href="#find-activities" @click="setActiveSection('find-activities')" :class="{ 'active': activeSection === 'find-activities' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Find Activities</a>
+                        <a href="#maximize-cas" @click="setActiveSection('maximize-cas')" :class="{ 'active': activeSection === 'maximize-cas' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Maximize CAS</a>
+                        <a href="#resources" @click="setActiveSection('resources')" :class="{ 'active': activeSection === 'resources' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Resources</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-teal-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="h-6 w-6" x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div x-show="mobileMenuOpen" x-cloak class="md:hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" @click="setActiveSection('home'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Home</a>
+                <a href="#understanding-cas" @click="setActiveSection('understanding-cas'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Understanding CAS</a>
+                <a href="#find-activities" @click="setActiveSection('find-activities'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Find Activities</a>
+                <a href="#maximize-cas" @click="setActiveSection('maximize-cas'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Maximize CAS</a>
+                <a href="#resources" @click="setActiveSection('resources'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Resources</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <section id="home" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-3xl font-bold text-teal-700 mb-4">Welcome to the CAS Activity Explorer!</h2>
+            <p class="text-lg text-gray-700 mb-3">This tool is designed to help high school students, especially those in the IB Diploma Programme, find Creativity, Activity, Service (CAS) opportunities in the Numazu, Mishima, and Fuji City areas for <strong class="text-teal-600">June and July 2025</strong>.</p>
+            <p class="text-gray-600">Our goal is to provide a starting point for your CAS journey. We encourage you to explore these options, take initiative, and find experiences that are meaningful, challenging, and contribute to your personal growth. Remember, CAS is more than a checklist; it's an opportunity to develop and learn.</p>
+        </section>
+
+        <section id="understanding-cas" class="py-8 md:py-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Understanding CAS</h2>
+            <div class="space-y-4 max-w-3xl mx-auto">
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">What are the Three Strands of CAS?</h3>
+                        <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
+                        <p class="mb-2">CAS is structured around three interconnected strands:</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>🎨 Creativity:</strong> Exploring and extending ideas leading to an original or interpretive product or performance. Examples: visual arts, music, drama, design, creative writing.</li>
+                            <li><strong>🏃 Activity:</strong> Physical exertion contributing to a healthy lifestyle. Examples: sports, dance, hiking, martial arts.</li>
+                            <li><strong>🤝 Service:</strong> Collaborative and reciprocal engagement with the community in response to an authentic need (unpaid and voluntary). Examples: volunteering, community projects, environmental conservation.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">Key Elements of a Successful CAS Experience</h3>
+                         <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Clear Goals & Achievable Outcomes</li>
+                            <li>Personal Challenge & Pushing Boundaries</li>
+                            <li>Planning and Initiative</li>
+                            <li>Collaboration</li>
+                            <li>Commitment and Perseverance</li>
+                            <li>Ongoing Reflection</li>
+                            <li>Ethical Considerations</li>
+                        </ul>
+                    </div>
+                </div>
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">The Seven CAS Learning Outcomes</h3>
+                        <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Identify own strengths and develop areas for growth.</li>
+                            <li>Demonstrate that challenges have been undertaken, developing new skills.</li>
+                            <li>Demonstrate how to initiate and plan a CAS experience.</li>
+                            <li>Show commitment to and perseverance in CAS experiences.</li>
+                            <li>Demonstrate the skills and recognize the benefits of working collaboratively.</li>
+                            <li>Demonstrate engagement with issues of global significance.</li>
+                            <li>Recognize and consider the ethics of choices and actions.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="find-activities" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Find CAS Activities (June & July 2025)</h2>
+            
+            <div class="mb-8 p-4 border border-teal-200 rounded-lg bg-teal-50">
+                <p class="text-sm text-teal-700">Use the filters below to find activities. Click on an activity card for more details. All information is based on the "Navigating Your CAS Journey" report and should be verified with organizers.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 items-end">
+                <div>
+                    <label for="filter-strand" class="block text-sm font-medium text-gray-700 mb-1">CAS Strand</label>
+                    <select id="filter-strand" x-model="filters.strand" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                        <option value="">All Strands</option>
+                        <option value="Creativity">Creativity</option>
+                        <option value="Activity">Activity</option>
+                        <option value="Service">Service</option>
+                        <option value="Cross-Strand">Cross-Strand</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-city" class="block text-sm font-medium text-gray-700 mb-1">City/Area</label>
+                    <select id="filter-city" x-model="filters.city" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                        <option value="">All Cities</option>
+                        <option value="Fuji City">Fuji City</option>
+                        <option value="Mishima">Mishima</option>
+                        <option value="Numazu">Numazu</option>
+                        <option value="Fujinomiya">Fujinomiya</option>
+                        <option value="Near Mt. Fuji">Near Mt. Fuji</option>
+                        <option value="Mt. Fuji area">Mt. Fuji area</option>
+                        <option value="Lake Kawaguchi">Lake Kawaguchi</option>
+                        <option value="Ito City">Ito City</option>
+                        <option value="Shizuoka">Shizuoka (Tour)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-month" class="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                    <select id="filter-month" x-model="filters.month" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                        <option value="">All Months</option>
+                        <option value="June">June 2025</option>
+                        <option value="July">July 2025</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="sort-by" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                    <select id="sort-by" x-model="sortBy" @change="sortActivities" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                        <option value="date">Date (Earliest First)</option>
+                        <option value="name">Name (A-Z)</option>
+                        <option value="city">City (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 p-4 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2 text-center">Activities by Strand</h3>
+                    <div class="chart-container">
+                        <canvas id="strandChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2 text-center">Activities by City</h3>
+                    <div class="chart-container">
+                        <canvas id="cityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div x-show="filteredActivities.length === 0" class="text-center py-10 text-gray-500">
+                <p class="text-xl">No activities match your current filters.</p>
+                <p>Try adjusting your search criteria.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="activity in pagedActivities" :key="activity.id">
+                    <div @click="openModal(activity)" class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden flex flex-col">
+                        <div class="p-5 flex-grow">
+                            <h3 class="text-lg font-semibold text-teal-700 mb-2" x-text="activity.name"></h3>
+                            <p class="text-sm text-gray-600 mb-1"><strong class="font-medium">📍 City:</strong> <span x-text="activity.city"></span></p>
+                            <p class="text-sm text-gray-600 mb-3"><strong class="font-medium">📅 Dates:</strong> <span x-text="activity.datesShort"></span></p>
+                            <div class="mb-2">
+                                <template x-for="strand in activity.strands" :key="strand">
+                                    <span :class="{
+                                        'tag-creativity': strand === 'Creativity',
+                                        'tag-activity': strand === 'Activity',
+                                        'tag-service': strand === 'Service'
+                                    }" class="tag" x-text="strand"></span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-3 text-right">
+                            <span class="text-sm text-teal-600 font-medium">View Details &rarr;</span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div x-show="totalPages > 1" class="mt-8 flex justify-center items-center space-x-2">
+                <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">&laquo; Prev</button>
+                <template x-for="page in pageNumbers" :key="page">
+                    <button @click="goToPage(page)" :class="{'bg-teal-600 text-white': currentPage === page, 'bg-gray-200 text-gray-700 hover:bg-gray-300': currentPage !== page}" class="px-4 py-2 rounded-md" x-text="page"></button>
+                </template>
+                <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">Next &raquo;</button>
+            </div>
+
+        </section>
+
+        <div x-show="selectedActivity" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 z-50" :class="{'active': selectedActivity !== null}" @click.self="closeModal" x-cloak>
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-teal-700" x-text="selectedActivity?.name"></h3>
+                    <button @click="closeModal" class="text-gray-500 hover:text-gray-700">&times;</button>
+                </div>
+                <div class="p-6 overflow-y-auto modal-content flex-grow">
+                    <p class="mb-3 text-gray-700"><strong class="font-semibold text-gray-800">Description:</strong> <span x-html="selectedActivity?.description"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">📍 City/Area:</strong> <span x-text="selectedActivity?.city" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">📅 Dates:</strong> <span x-text="selectedActivity?.dates" class="text-gray-700"></span></p>
+                    <div class="mb-3">
+                        <strong class="font-semibold text-gray-800">CAS Strand(s):</strong>
+                        <div>
+                            <template x-for="strand in selectedActivity?.strands" :key="strand">
+                                <span :class="{
+                                    'tag-creativity': strand === 'Creativity',
+                                    'tag-activity': strand === 'Activity',
+                                    'tag-service': strand === 'Service'
+                                }" class="tag" x-text="strand"></span>
+                            </template>
+                        </div>
+                    </div>
+                    <p class="mb-2" x-show="selectedActivity?.potentialLOs"><strong class="font-semibold text-gray-800">Potential Learning Outcomes:</strong> <span x-text="selectedActivity?.potentialLOs" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">🔗 URL/Contact:</strong> <span x-html="formatContact(selectedActivity?.contact)" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">💰 Application Cost:</strong> <span x-text="selectedActivity?.cost" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">⏳ Application Deadline:</strong> <span x-text="selectedActivity?.deadline" class="text-gray-700"></span></p>
+                    <p class="text-xs text-gray-500 mt-3" x-show="selectedActivity?.sourceRef">Source Reference: <span x-text="selectedActivity?.sourceRef"></span></p>
+                </div>
+                <div class="p-4 border-t border-gray-200 text-right">
+                    <button @click="closeModal" class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <section id="maximize-cas" class="py-8 md:py-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Maximizing Your CAS Experience</h2>
+            <div class="space-y-4 max-w-3xl mx-auto">
+                 <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">Student Initiative: Beyond the List</h3>
+                        <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
+                        <p>This explorer is a starting point. The most impactful CAS experiences often come from your own initiative. Identify needs, pursue personal interests, and even create your own unique experiences. Discuss ideas with your CAS Coordinator.</p>
+                    </div>
+                </div>
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">The Crucial Role of Reflection</h3>
+                        <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
+                        <p>Reflection transforms activity into learning. Reflect before (goals, challenges), during (feelings, skills, observations), and after (what was learned, impact, improvements). Ask yourself: What did I learn? How did I grow? What skills did I develop?</p>
+                    </div>
+                </div>
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">Documenting Experiences & Gathering Evidence</h3>
+                         <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
+                        <p>Maintain a CAS portfolio or journal. Include written reflections, photos, videos, products created, testimonials, or certificates. For ongoing experiences, include multiple reflections and pieces of evidence.</p>
+                    </div>
+                </div>
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">Ethical Considerations in Action</h3>
+                         <svg :class="{'rotate-180': open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" x-transition class="accordion-content mt-2 text-gray-600">
+                        <p>Act with integrity, honesty, and fairness. Respect the dignity and rights of all involved. Ensure service addresses authentic needs and is culturally sensitive and beneficial. Consider environmental and social impacts.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resources" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Further Resources & Next Steps</h2>
+            <div class="max-w-3xl mx-auto text-gray-700">
+                <p class="mb-4">While this guide offers specific leads, several local organizations serve as ongoing resources:</p>
+                <ul class="list-disc list-inside space-y-3 mb-4">
+                    <li><strong>City Halls/Ward Offices:</strong> Numazu, Mishima, and Fuji City offices often have info on local events and volunteer needs. Check their official websites.</li>
+                    <li><strong>Social Welfare Councils (Shakai Fukushi Kyougikai 社会福祉協議会):</strong>
+                        <ul class="list-circle list-inside ml-4 mt-1 space-y-1">
+                            <li>Numazu City Volunteer Center: 055-922-1500</li>
+                            <li>Mishima City Council of Social Welfare: 055-972-3221</li>
+                            <li>Fuji City Council of Social Welfare: 0545-64-4649 or 0545-64-6600</li>
+                        </ul>
+                    </li>
+                    <li><strong>Online Volunteer Platforms:</strong>
+                        <ul class="list-circle list-inside ml-4 mt-1">
+                            <li>Activo.jp: Search for volunteer opportunities across Japan, filterable by area and interest.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p class="font-semibold text-teal-700">Remember to take initiative! The most rewarding CAS journeys are often student-driven. Discuss your ideas with your CAS Coordinator.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8 text-center">
+        <div class="container mx-auto px-4">
+            <p class="text-sm mb-2">&copy; 2025 CAS Activity Explorer. Information based on the "Navigating Your CAS Journey" report.</p>
+            <p class="text-xs text-gray-400"><strong>Important Note:</strong> All activity details (dates, costs, availability) are subject to change. Please verify directly with organizers before making plans. This tool is a guide and not an official endorsement of any specific activity.</p>
+        </div>
+    </footer>
+
+<script>
+function casApp() {
+    return {
+        activeSection: 'home',
+        mobileMenuOpen: false,
+        activities: [],
+        filteredActivities: [],
+        selectedActivity: null,
+        filters: {
+            strand: '',
+            city: '',
+            month: ''
+        },
+        sortBy: 'date',
+        itemsPerPage: 9,
+        currentPage: 1,
+        strandChart: null,
+        cityChart: null,
+
+        init() {
+            this.loadActivities();
+
+            this.$nextTick(() => {
+                this.setupCharts();
+                this.applyFilters(); 
+            });
+
+            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        this.activeSection = entry.target.id;
+                    }
+                });
+            }, observerOptions);
+            document.querySelectorAll('main section').forEach(section => observer.observe(section));
+            
+            window.addEventListener('hashchange', () => {
+                const hash = window.location.hash.substring(1);
+                if (hash) this.setActiveSection(hash);
+            });
+
+            // Set initial section based on hash, if present, after Alpine is ready
+            this.$nextTick(() => {
+                if (window.location.hash) {
+                    this.setActiveSection(window.location.hash.substring(1));
+                }
+            });
+        },
+
+        setActiveSection(sectionId) {
+            this.activeSection = sectionId;
+            const element = document.getElementById(sectionId);
+            if (element) {
+                const headerOffset = document.querySelector('header').offsetHeight;
+                const elementPosition = element.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 10; 
+                window.scrollTo({
+                     top: offsetPosition,
+                     behavior: "smooth"
+                });
+            }
+        },
+
+        loadActivities() {
+            this.activities = [
+                { id: 'c1', name: '"Yururi Yoshiwara Afternoon - Yukata Dressing Challenge!!"', city: 'Fuji City', description: 'Learn the art of wearing a Yukata and explore its cultural significance. This involves appreciating traditional aesthetics and developing a new skill.', potentialLOs: 'LO1 (cultural understanding), LO2 (new skill)', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 1, 2025 (Verify if repeats or extends into June/July)', datesShort: 'Jun 1 (Verify)', startDate: '2025-06-01', contact: 'Check local Fuji City event listings [10] for organizer/contact.', cost: 'TBD (Check with organizer)', deadline: 'TBD (Check with organizer)', sourceRef: '[10]' },
+                { id: 'c2', name: 'Fuji City General Cultural Festival - Spring Festival "Handbell"', city: 'Fuji City', description: 'Attend or potentially participate in a handbell performance as part of a local cultural festival. Engagement beyond passive attendance (e.g., reflection, learning about handbells) is key for CAS.', potentialLOs: 'LO1 (musical appreciation), LO2 (if learning/performing)', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 1, 2025', datesShort: 'Jun 1', startDate: '2025-06-01', contact: 'Fuji City Rose Theatre: 0545-60-2500 [11]', cost: 'Free (for attendance) [11]', deadline: 'N/A for attendance', sourceRef: '[11]' },
+                { id: 'c3', name: 'Fuji City General Cultural Festival - Spring Festival "Nihon Buyo" (Japanese Dance)', city: 'Fuji City', description: 'Experience traditional Japanese dance. Active reflection on the art form, its history, and aesthetics can make this a creative experience.', potentialLOs: 'LO1 (cultural appreciation), LO2 (if inspired to learn)', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 1, 2025', datesShort: 'Jun 1', startDate: '2025-06-01', contact: 'Fuji City Rose Theatre: 0545-60-2500 [11]', cost: 'Free (for attendance) [11]', deadline: 'N/A for attendance', sourceRef: '[11]' },
+                { id: 'c4', name: 'HANDBELL FESTA - Sacred Sounds Part XII', city: 'Fuji City', description: 'Attend a handbell festival. Similar to the cultural festival event, active engagement through reflection or further research enhances CAS value.', potentialLOs: 'LO1, LO2', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 1, 2025 (Requires application/ticket)', datesShort: 'Jun 1 (App Req.)', startDate: '2025-06-01', contact: 'Check local Fuji City event listings [10] for organizer/contact.', cost: 'TBD (Check with organizer)', deadline: 'Application required (check with organizer)', sourceRef: '[10]' },
+                { id: 'c5', name: 'Movie "Sekai de Ichiban Tooi no wa..." Preview Screening', city: 'Fuji City', description: 'Attend a preview screening of a movie set in Fuji City. Creative engagement can come from analyzing film techniques, themes, and writing a reflective review.', potentialLOs: 'LO1 (critical analysis), LO2 (understanding filmmaking)', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 2, 2025', datesShort: 'Jun 2', startDate: '2025-06-02', contact: 'Fuji City Hall City Promotion Division: 0545-55-2958 [11]', cost: 'Pre-registration required [11]', deadline: 'Check with organizer', sourceRef: '[8, 11]' },
+                { id: 'c6', name: 'Mishima Skywalk Hydrangea Festival - "My Best Hydrangea Photo" Competition', city: 'Mishima', description: 'Participate in an Instagram photography competition during the Hydrangea Festival, capturing the beauty of 13,000 hydrangeas. This involves artistic skill, creative thinking in composition, and expressing a personal interpretation.', potentialLOs: 'LO1 (strengths in art), LO2 (developing photography skills)', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'Festival: June 7 - July 8, 2025. Photo Competition Submission: June 7 - July 8, 2025.', datesShort: 'Jun 7 - Jul 8', startDate: '2025-06-07', contact: 'Official Website: https://mishima-skywalk.jp/, Instagram: @mishima_skywalk [12, 13]', cost: 'Festival entry 500 yen for HS students. Competition entry likely free with admission. [12]', deadline: 'Photo submission by July 8, 2025 [13]', sourceRef: '[12, 13]' },
+                { id: 'c7', name: 'Kiyotsuka Shinya Piano Trio Tour "Harmony"', city: 'Fuji City', description: 'Attend a professional piano trio concert. Reflecting on musical composition, performance skill, and emotional impact can constitute a creative experience.', potentialLOs: 'LO1, LO2', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 7, 2025', datesShort: 'Jun 7', startDate: '2025-06-07', contact: 'TV Shizuoka: 054-284-9999 (Sunray Folk Promotion Shizuoka) [11]', cost: '6,500 yen (Check for student discounts) [11]', deadline: 'Ticket purchase required', sourceRef: '[11]' },
+                { id: 'c8', name: 'Fuji Audrey Festival \'25', city: 'Fuji City', description: 'Attend a festival likely celebrating Audrey Hepburn or related themes. Creative engagement could involve exploring her cinematic art, fashion influence, or humanitarian work through reflection.', potentialLOs: 'LO1, LO2, LO6 (if focusing on humanitarian aspect)', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 8, 2025', datesShort: 'Jun 8', startDate: '2025-06-08', contact: 'Fuji Audrey Festival Executive Committee (Contact via Rose Theatre if needed) [11]', cost: 'Adults 3,000 yen (Check for student rates) [11]', deadline: 'Ticket purchase required', sourceRef: '[11]' },
+                { id: 'c9', name: 'Middle School Student Invitational Concert', city: 'Fuji City', description: 'Attend a concert performed by middle school students. This can be a creative experience by observing young talent, reflecting on musical education, or supporting local arts.', potentialLOs: 'LO1, LO2', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 12, 2025 (Morning & Afternoon sessions)', datesShort: 'Jun 12', startDate: '2025-06-12', contact: 'Fuji City Rose Theatre: 0545-60-2500 [11]', cost: '500 yen [11]', deadline: 'Ticket purchase required', sourceRef: '[11]' },
+                { id: 'c10', name: 'Fujinomiya North High School Wind Instrument Club Regular Concert', city: 'Fuji City (Rose Theatre)', description: 'Attend a concert by a local high school\'s wind instrument club. Supporting peers and appreciating their musical efforts is a creative engagement.', potentialLOs: 'LO1, LO5 (if reflecting on collaborative performance)', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 14, 2025', datesShort: 'Jun 14', startDate: '2025-06-14', contact: 'Fujinomiya North High School Wind Instrument Club (Contact via school or Rose Theatre) [11]', cost: 'Free [11]', deadline: 'N/A for attendance', sourceRef: '[11]' },
+                { id: 'c11', name: 'Eitetsu Hayashi Taiko Concert 2025 in Numazu', city: 'Numazu', description: 'Experience a powerful Taiko drumming concert. Active reflection on this traditional Japanese art form, its cultural significance, rhythm, and performance energy can be a rich creative experience.', potentialLOs: 'LO1 (cultural appreciation), LO2 (understanding a unique art form)', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 15, 2025', datesShort: 'Jun 15', startDate: '2025-06-15', contact: 'Numazu Civic Cultural Center (Check website: numazu-kousya.jp) [14, 15]', cost: 'HS students & below: 3,300 yen [14]', deadline: 'Ticket purchase required', sourceRef: '[14, 15]' },
+                { id: 'c12', name: 'Fuji City High School Wind Instrument Club Regular Concert', city: 'Fuji City (Rose Theatre)', description: 'Attend a concert by Fuji City High School\'s own wind instrument club. Similar to the Fujinomiya North HS concert, this is an opportunity for creative appreciation and peer support.', potentialLOs: 'LO1, LO5', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 15, 2025', datesShort: 'Jun 15', startDate: '2025-06-15', contact: 'Fuji City High School Wind Instrument Club (Contact via school or Rose Theatre) [11]', cost: 'Free [11]', deadline: 'N/A for attendance', sourceRef: '[11]' },
+                { id: 'c13', name: 'HOSHIKUZU SCAT TOUR 2025 “KMM”', city: 'Fuji City (Rose Theatre)', description: 'Attend a concert by the group Hoshikuzu Scat. Engaging with a professional musical performance and reflecting on its artistic merits can be a creative experience.', potentialLOs: 'LO1, LO2', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 15, 2025', datesShort: 'Jun 15', startDate: '2025-06-15', contact: 'Kyodo Tokai (Contact via Rose Theatre if needed) [11]', cost: '9,300 yen (Check for student discounts) [11]', deadline: 'Ticket purchase required', sourceRef: '[11]' },
+                { id: 'c14', name: 'Shizuoka Prefecture Fujimi Junior & Senior High School Wind Instrument Club Regular Concert', city: 'Fuji City (Rose Theatre)', description: 'Attend another local school\'s band concert. Provides further opportunity for creative appreciation and understanding of musical performance.', potentialLOs: 'LO1, LO5', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 22, 2025', datesShort: 'Jun 22', startDate: '2025-06-22', contact: 'Shizuoka Pref. Fujimi JHS/HS Wind Instrument Club (Contact via school or Rose Theatre) [11]', cost: 'Free [11]', deadline: 'N/A for attendance', sourceRef: '[11]' },
+                { id: 'c15', name: 'Elementary School Student Invitational Concert', city: 'Fuji City (Rose Theatre)', description: 'Attend a concert performed by elementary school students. Observing and reflecting on the development of young musical talent can be inspiring and a creative experience.', potentialLOs: 'LO1, LO2', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 26, 2025 (Morning & Afternoon sessions)', datesShort: 'Jun 26', startDate: '2025-06-26', contact: 'Fuji City Rose Theatre: 0545-60-2500 [11]', cost: '500 yen [11]', deadline: 'Ticket purchase required', sourceRef: '[11]' },
+                { id: 'c16', name: 'Kunitachi College of Music Shizuoka Prefecture Alumni Association Fuji/Fujinomiya Concert Vol.7 PROMNADE CONCERT', city: 'Fuji City (Rose Theatre)', description: 'Attend a concert by alumni of a renowned music college. This offers exposure to a high level of musical performance and can deepen creative appreciation.', potentialLOs: 'LO1, LO2', strands: ['Creativity'], primaryStrand: 'Creativity', dates: 'June 29, 2025', datesShort: 'Jun 29', startDate: '2025-06-29', contact: 'Kunitachi College of Music Alumni Association Shizuoka Prefecture Eastern Branch (Contact via Rose Theatre) [11]', cost: '2,000 yen [11]', deadline: 'Ticket purchase required', sourceRef: '[11]' },
+                { id: 'a1', name: 'Mishima Skywalk - Exploring Grounds & Forest Trails', city: 'Mishima', description: 'Engage in physical activity by walking the 400m suspension bridge and exploring the extensive 7,000m² park and forest trails. Set personal goals for distance or exploration. Contributes to a healthy lifestyle.', potentialLOs: 'LO1 (improving fitness), LO4 (commitment if done regularly)', strands: ['Activity'], primaryStrand: 'Activity', dates: 'Open daily. Hydrangea Festival June 7 - July 8, 2025.', datesShort: 'Daily (Jun 7 - Jul 8 for Festival)', startDate: '2025-06-01', contact: 'Official Website: https://mishima-skywalk.jp/ [12]', cost: '500 yen for HS students [12]', deadline: 'N/A', sourceRef: '[12, 16]' },
+                { id: 'a2', name: 'Forest Adventure at Mishima Skywalk', city: 'Mishima', description: 'Participate in athletic courses and zip lines, offering direct physical challenges and exertion.', potentialLOs: 'LO1 (physical skills), LO2 (overcoming challenges)', strands: ['Activity'], primaryStrand: 'Activity', dates: 'Open daily (verify 2025 specific session booking for June/July)', datesShort: 'Daily (Booking may be req.)', startDate: '2025-06-01', contact: 'Mishima Skywalk: https://mishima-skywalk.jp/ or 055-972-0084 [13]', cost: 'Separate fee for Forest Adventure (Check website)', deadline: 'Booking may be required', sourceRef: '[13, 16]' },
+                { id: 'a3', name: 'Mt. Fuji Children\'s Country Water Land Programs', city: 'Near Fuji City (Susono City)', description: 'Enjoy water-based activities such as canoeing and exploring water playgrounds. Offers physical exertion and outdoor engagement.', potentialLOs: 'LO1, LO2', strands: ['Activity'], primaryStrand: 'Activity', dates: 'June 2025 (Exact dates TBD - verify with venue)', datesShort: 'June (Verify)', startDate: '2025-06-01', contact: 'Mt. Fuji Children\'s Country website or contact.', cost: 'Entry fee + activity fees may apply (Check website)', deadline: 'TBD (Check with venue)', sourceRef: '[17]' },
+                { id: 'a4', name: 'Fuji Ultra Walking Circuit (Portions or Training)', city: 'Mt. Fuji area', description: 'Walk sections of the 125km circuit around Mt. Fuji, or train for such a challenge. This is a significant physical undertaking requiring planning and perseverance.', potentialLOs: 'LO1, LO2, LO4', strands: ['Activity'], primaryStrand: 'Activity', dates: 'June 2025', datesShort: 'June', startDate: '2025-06-01', contact: 'e-Moshicom (platform for sports events) or search for official event page.', cost: 'Event registration fee likely (Check with organizer)', deadline: 'TBD (Check with organizer)', sourceRef: '[17]' },
+                { id: 'a5', name: 'Mt. Fuji Climbing (Official Season Start)', city: 'Mt. Fuji (Shizuoka Trails: Fujinomiya, Gotemba, Subashiri)', description: 'Climb Mt. Fuji. The official climbing season typically starts in early July. This is a major physical challenge requiring preparation, adherence to safety rules, and potentially registration/fees.', potentialLOs: 'LO1, LO2, LO4, LO7 (risk awareness)', strands: ['Activity'], primaryStrand: 'Activity', dates: 'Early July - Early September 2025 (Verify exact 2025 trail opening dates)', datesShort: 'Early July onwards', startDate: '2025-07-01', contact: 'Official Mt. Fuji Climbing Website: https://www.fujisan-climb.jp/en/ [18]', cost: 'Mandatory Hiking Fee: 4,000 yen (Shizuoka trails require pre-registration system use) [18]', deadline: 'Pre-registration required for Shizuoka trails [18]', sourceRef: '[18]' },
+                { id: 's1', name: 'Mt. Fuji World Heritage Centre Support Volunteer Program', city: 'Fujinomiya (near Fuji City)', description: 'Assist with Centre operations, educational outreach, library management, and environmental beautification. This program requires a significant, year-round commitment. *Not a summer-only option.*', potentialLOs: 'LO3, LO4, LO5, LO6, LO7', strands: ['Service'], primaryStrand: 'Service', dates: 'Year-round (approx. 2 days/month). Application for 2025 intake: Info sessions Jan 2025, Training Mar 2025.', datesShort: 'Year-round (Long-term)', startDate: '2025-03-01', contact: 'Mt. Fuji World Heritage Centre Volunteer Page: [19] or general contact 0544-21-3776 [20]', cost: 'Free', deadline: 'Entry sheet deadline Feb 7, 2025 for 2025 intake [19]', sourceRef: '[19, 20]' },
+                { id: 's2', name: 'Volunteer for Sea Play with Children with Disabilities', city: 'Ito City (Shizuoka Pref.)', description: 'Assist NPO Asomana in supporting children with disabilities during sea play activities. Direct engagement and support for community members.', potentialLOs: 'LO1, LO2, LO5, LO6, LO7', strands: ['Service'], primaryStrand: 'Service', dates: 'July 20-21, 2025', datesShort: 'Jul 20-21', startDate: '2025-07-20', contact: 'NPO Asomana [21]', cost: 'Free [21]', deadline: 'Check Activo.jp listing for deadline/contact', sourceRef: '[21]' },
+                { id: 's3', name: 'Mishima City Summer Vacation Volunteer Experience (夏休みボランティア体験)', city: 'Mishima', description: 'Participate in volunteer activities with various local civic organizations and community groups during the summer vacation. Aims to provide experience in community engagement.', potentialLOs: 'LO3, LO5, LO6', strands: ['Service'], primaryStrand: 'Service', dates: 'Late July to end of August 2025 (specific dates depend on host organization). Mandatory pre-briefing after mid-July.', datesShort: 'Late July - Aug', startDate: '2025-07-20', contact: 'Mishima City Citizens\' Activity Center: 055-983-2693. Electronic application. [22]', cost: 'Free. Volunteer insurance likely covered. [22]', deadline: 'Applications open around June 2025 [22]', sourceRef: '[22]' },
+                { id: 's4', name: 'Numazu City Volunteer Center Opportunities', city: 'Numazu', description: 'Connect with local volunteer needs through the city\'s volunteer center. Opportunities can vary (e.g., welfare facilities, events). Emphasizes student initiative to inquire.', potentialLOs: 'LO3, LO5, LO6', strands: ['Service'], primaryStrand: 'Service', dates: 'Ongoing (June/July specific opportunities TBD by inquiry)', datesShort: 'Ongoing (Inquire)', startDate: '2025-06-01', contact: 'Numazu City Volunteer Center (Social Welfare Council): 055-922-1500, info@numazu-shakyo.jp [23]', cost: 'Generally free', deadline: 'Varies by opportunity', sourceRef: '[23]' },
+                { id: 's5', name: 'Fuji City Council of Social Welfare Opportunities', city: 'Fuji City', description: 'Similar to Numazu, the Fuji Council of Social Welfare can connect students with local volunteer needs. Proactive inquiry is key.', potentialLOs: 'LO3, LO5, LO6', strands: ['Service'], primaryStrand: 'Service', dates: 'Ongoing (June/July specific opportunities TBD by inquiry)', datesShort: 'Ongoing (Inquire)', startDate: '2025-06-01', contact: 'Fuji City Council of Social Welfare: 0545-64-4649 or 0545-64-6600 [24]', cost: 'Generally free', deadline: 'Varies by opportunity', sourceRef: '[24, 25]' },
+                { id: 'cs1', name: 'Shibakawa Biyori Plum Village Inako Festival', city: 'Near Mt. Fuji (Fujinomiya/ Fuji area - verify exact location)', description: 'Festival with market, fish catching, dance shows, stamp rally. C: dance, crafts. A: fish catching, stamp rally. S: helping vendors, community engagement.', potentialLOs: 'LO2, LO3, LO5, LO6', strands: ['Creativity', 'Activity', 'Service'], primaryStrand: 'Creativity', dates: 'June 2025 (Exact dates TBD - verify with local tourism info or search for event)', datesShort: 'June (Verify)', startDate: '2025-06-01', contact: 'Check local tourism boards for Inako area or Shibakawa.', cost: 'TBD (Likely free entry, activity costs may vary)', deadline: 'TBD', sourceRef: '[17]' },
+                { id: 'cs2', name: 'Dog Marche Fujisan', city: 'Fuji City', description: 'A market event for dog lovers. C: observing unique breeds, crafts. A: walking, playing in designated areas. S: potential to volunteer with organizers.', potentialLOs: 'LO3, LO5, LO6', strands: ['Creativity', 'Activity', 'Service'], primaryStrand: 'Creativity', dates: 'June 7-8, 2025', datesShort: 'Jun 7-8', startDate: '2025-06-07', contact: 'Facetoface Contextually [10] or Fujisan Wanwan Marche [26, 27] to clarify event and volunteer roles.', cost: 'Free entry (likely).[27] Volunteer: Free.', deadline: 'Volunteer: Inquire ASAP.', sourceRef: '[10, 26, 27]' },
+                { id: 'cs3', name: 'Rakujuen Park - Various Marche Events (N\'s Marche, Anmmer Marche)', city: 'Mishima', description: 'Local markets held in Rakujuen Park. C: appreciating/selling handmade crafts. A: walking around the park/market. S: potentially assisting vendors or event organizers (inquire).', potentialLOs: 'LO2, LO3, LO5', strands: ['Creativity', 'Activity', 'Service'], primaryStrand: 'Creativity', dates: 'N\'s Marche: June 15, 2025. Anmmer Marche: June 29, 2025.', datesShort: 'Jun 15 & Jun 29', startDate: '2025-06-15', contact: 'Rakujuen Park: 055-975-2570 [28]', cost: 'Park entry may apply (check with Rakujuen). Volunteer: Free.', deadline: 'Volunteer: Inquire.', sourceRef: '[5, 28]' },
+                { id: 'cs4', name: 'Business Startup Experience Bus Tour', city: 'Shizuoka (Starts Fukuroi, ends Hamamatsu)', description: 'A bus tour focused on learning about regional social issues and entrepreneurship. C: developing innovative ideas. S: if ideas address social needs. A: participation in the tour itself.', potentialLOs: 'LO2, LO3, LO6, LO7', strands: ['Creativity', 'Service', 'Activity'], primaryStrand: 'Creativity', dates: 'June 15, 2025', datesShort: 'Jun 15', startDate: '2025-06-15', contact: '一般社団法人OWN WAY [21]', cost: 'Free [21]', deadline: 'Check Activo.jp listing', sourceRef: '[21]' },
+                { id: 'ca1', name: 'Lake Kawaguchi Herb Festival', city: 'Lake Kawaguchi (Yamanashi, near Mt. Fuji)', description: 'Lavender viewing and festival activities. A: walking through parks. C: photography, appreciating natural beauty, cultural displays.', potentialLOs: 'LO1, LO2', strands: ['Activity', 'Creativity'], primaryStrand: 'Activity', dates: 'June 2025 (Exact dates TBD - verify with Kawaguchiko tourism)', datesShort: 'June (Verify)', startDate: '2025-06-01', contact: 'Kawaguchiko Tourism Association or search for official event page.', cost: 'TBD (Park entry may be free, some activities might have costs)', deadline: 'TBD', sourceRef: '[17]' },
+                { id: 'sc1', name: 'Groundwork Mishima - "Yumemishima" Rice Planting Experience', city: 'Mishima', description: 'Participate in community rice planting for a local brand of rice. S: contributing to local agriculture/community project. A: physical work of planting. C: learning about traditional farming.', potentialLOs: 'LO2, LO4, LO5, LO6', strands: ['Service', 'Activity', 'Creativity'], primaryStrand: 'Service', dates: 'June 7, 2025', datesShort: 'Jun 7', startDate: '2025-06-07', contact: 'Groundwork Mishima: 055-983-0136, info@gwmishima.jp [29, 30]', cost: 'Likely free or small participation fee (verify)', deadline: 'Registration likely required (inquire)', sourceRef: '[29, 30]' },
+                { id: 'sc2', name: 'Mishima Firefly Festival - Volunteer & Observation', city: 'Mishima', description: 'Festival celebrating fireflies. S: volunteer with organizers or event support. C: photography, learning about ecology. A: evening walks for observation.', potentialLOs: 'LO2, LO3, LO5, LO6, LO7', strands: ['Service', 'Creativity', 'Activity'], primaryStrand: 'Service', dates: 'Festival: June 7-14, 2025. Rakujuen Park event: June 14.', datesShort: 'Jun 7-14', startDate: '2025-06-07', contact: 'Groundwork Mishima: 055-983-0136.[29] Mishima Tourist Association. Rakujuen Park: 055-975-2570.[28]', cost: 'Free for public areas/observation. Rakujuen free on June 14.[5] Volunteer: Free.', deadline: 'Volunteer: Inquire ASAP.', sourceRef: '[5, 17, 31, 32, 33]' },
+                { id: 'sc3', name: 'Groundwork Mishima - "Kagamiike" Pond Maintenance / "Mishima Migaki" Community Cleanup', city: 'Mishima', description: 'Participate in regular environmental maintenance of local natural sites (Kagamiike: 1st Sat monthly) or broader community cleanups. S: direct environmental service. A: physical work involved.', potentialLOs: 'LO4, LO5, LO6', strands: ['Service', 'Activity'], primaryStrand: 'Service', dates: 'Kagamiike: June 1 & July 6, 2025 (10 AM). Mishima Migaki: Check schedule.', datesShort: 'Jun 1 & Jul 6 (Kagamiike)', startDate: '2025-06-01', contact: 'Groundwork Mishima: 055-983-0136, info@gwmishima.jp [29, 30]', cost: 'Free', deadline: 'Show up or contact for Mishima Migaki schedule.', sourceRef: '[29, 30]' },
+            ];
+        },
+
+        applyFilters() {
+            this.currentPage = 1;
+            let tempActivities = this.activities;
+
+            if (this.filters.strand) {
+                if (this.filters.strand === 'Cross-Strand') {
+                    tempActivities = tempActivities.filter(act => act.strands.length > 1);
+                } else {
+                    tempActivities = tempActivities.filter(act => act.strands.includes(this.filters.strand));
+                }
+            }
+
+            if (this.filters.city) {
+                tempActivities = tempActivities.filter(act => act.city.includes(this.filters.city) || (this.filters.city === "Fujinomiya" && act.city.includes("Fujinomiya")) || (this.filters.city === "Near Mt. Fuji" && act.city.includes("Near Mt. Fuji")) || (this.filters.city === "Mt. Fuji area" && act.city.includes("Mt. Fuji area")) || (this.filters.city === "Lake Kawaguchi" && act.city.includes("Lake Kawaguchi")) || (this.filters.city === "Ito City" && act.city.includes("Ito City")) || (this.filters.city === "Shizuoka (Tour)" && act.city.includes("Shizuoka (Starts Fukuroi")) );
+            }
+
+            if (this.filters.month) {
+                const monthNumber = this.filters.month === 'June' ? 6 : 7;
+                tempActivities = tempActivities.filter(act => {
+                    const actDate = new Date(act.startDate);
+                    if (act.dates.toLowerCase().includes('june') && this.filters.month === 'June') return true;
+                    if (act.dates.toLowerCase().includes('july') && this.filters.month === 'July') return true;
+                    return actDate.getUTCMonth() + 1 === monthNumber;
+                });
+            }
+            
+            this.filteredActivities = tempActivities;
+            this.sortActivities(); 
+            this.updateCharts();
+        },
+        
+        sortActivities() {
+            let sorted = [...this.filteredActivities];
+            if (this.sortBy === 'date') {
+                sorted.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+            } else if (this.sortBy === 'name') {
+                sorted.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (this.sortBy === 'city') {
+                sorted.sort((a, b) => a.city.localeCompare(b.city));
+            }
+            this.filteredActivities = sorted;
+        },
+        
+        get pagedActivities() {
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+            return this.filteredActivities.slice(start, end);
+        },
+
+        get totalPages() {
+            return Math.ceil(this.filteredActivities.length / this.itemsPerPage);
+        },
+        
+        get pageNumbers() {
+            const numbers = [];
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
+            
+            if (endPage - startPage + 1 < maxPagesToShow) {
+                 startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                numbers.push(i);
+            }
+            return numbers;
+        },
+
+        nextPage() {
+            if (this.currentPage < this.totalPages) this.currentPage++;
+        },
+
+        prevPage() {
+            if (this.currentPage > 1) this.currentPage--;
+        },
+        
+        goToPage(pageNumber) {
+            this.currentPage = pageNumber;
+        },
+
+        openModal(activity) {
+            this.selectedActivity = activity;
+        },
+
+        closeModal() {
+            this.selectedActivity = null;
+        },
+
+        formatContact(contactInfo) {
+            if (!contactInfo) return 'N/A';
+            const urlRegex = /(https?:\/\/[^\s\[]+)/g;
+            const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
+            
+            let formatted = contactInfo.replace(urlRegex, '<a href="$1" target="_blank" class="text-teal-600 hover:underline break-all">$1</a>');
+            formatted = formatted.replace(emailRegex, '<a href="mailto:$1" class="text-teal-600 hover:underline break-all">$1</a>');
+            return formatted;
+        },
+
+        setupCharts() {
+            const strandCtx = document.getElementById('strandChart').getContext('2d');
+            this.strandChart = new Chart(strandCtx, {
+                type: 'pie',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            const cityCtx = document.getElementById('cityChart').getContext('2d');
+            this.cityChart = new Chart(cityCtx, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Activities', data: [], backgroundColor: '#67E8F9' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+            // Initial update with all activities or empty if filters are immediately applied
+            this.updateCharts(); 
+        },
+
+        updateCharts() {
+            if (!this.strandChart || !this.cityChart) {
+                return;
+            }
+
+            const activitiesToChart = this.filteredActivities.length > 0 ? this.filteredActivities : this.activities;
+
+            const strandCounts = activitiesToChart.reduce((acc, act) => {
+                const strand = act.strands.length > 1 ? 'Cross-Strand' : act.primaryStrand;
+                acc[strand] = (acc[strand] || 0) + 1;
+                return acc;
+            }, {});
+            this.strandChart.data.labels = Object.keys(strandCounts);
+            this.strandChart.data.datasets[0].data = Object.values(strandCounts);
+            this.strandChart.update();
+
+            const cityCounts = activitiesToChart.reduce((acc, act) => {
+                acc[act.city] = (acc[act.city] || 0) + 1;
+                return acc;
+            }, {});
+            const sortedCities = Object.entries(cityCounts).sort(([,a],[,b]) => b-a).slice(0,10); 
+            this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
+            this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
+            this.cityChart.update();
+        }
+    };
+}
+</script>
+</body>
+</html>
