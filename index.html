@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAS Activity Explorer - Numazu, Mishima, Fuji City</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 300px; max-height: 350px; }
@@ -365,8 +365,8 @@ function casApp() {
             this.loadActivities();
 
             this.$nextTick(() => {
-                this.setupCharts();
-                this.applyFilters(); 
+                this.setupCharts();    // Create chart instances
+                this.applyFilters();   // Apply initial filters, which will sort and then call updateCharts()
             });
 
             const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
@@ -384,7 +384,6 @@ function casApp() {
                 if (hash) this.setActiveSection(hash);
             });
 
-            // Set initial section based on hash, if present, after Alpine is ready
             this.$nextTick(() => {
                 if (window.location.hash) {
                     this.setActiveSection(window.location.hash.substring(1));
@@ -545,28 +544,34 @@ function casApp() {
         },
 
         setupCharts() {
-            const strandCtx = document.getElementById('strandChart').getContext('2d');
-            this.strandChart = new Chart(strandCtx, {
-                type: 'pie',
-               data: { 
-                    labels: ['Loading'], 
-                    datasets: [{ data: [1], backgroundColor: ['#ECFCCB'] }] 
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-            });
+            const strandCtx = document.getElementById('strandChart');
+            if (strandCtx) {
+                if (this.strandChart) { this.strandChart.destroy(); } // Destroy existing chart before creating new
+                this.strandChart = new Chart(strandCtx.getContext('2d'), {
+                    type: 'pie',
+                    data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3'] }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            } else {
+                console.error("Canvas element with ID 'strandChart' not found.");
+            }
 
-            const cityCtx = document.getElementById('cityChart').getContext('2d');
-            this.cityChart = new Chart(cityCtx, {
-                type: 'bar',
-                data: { labels: ['Loading'], datasets: [{ label: 'Activities', data: [1], backgroundColor: '#67E8F9' }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-            // Initial update with all activities or empty if filters are immediately applied
-            this.updateCharts(); 
+            const cityCtx = document.getElementById('cityChart');
+            if (cityCtx) {
+                if (this.cityChart) { this.cityChart.destroy(); } // Destroy existing chart
+                this.cityChart = new Chart(cityCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [{ label: 'Activities', data: [], backgroundColor: '#67E8F9' }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                });
+            } else {
+                console.error("Canvas element with ID 'cityChart' not found.");
+            }
         },
 
         updateCharts() {
             if (!this.strandChart || !this.cityChart) {
+                // console.warn("Charts not fully initialized yet, skipping update.");
                 return;
             }
 
@@ -577,18 +582,24 @@ function casApp() {
                 acc[strand] = (acc[strand] || 0) + 1;
                 return acc;
             }, {});
-            this.strandChart.data.labels = Object.keys(strandCounts);
-            this.strandChart.data.datasets[0].data = Object.values(strandCounts);
-            this.strandChart.update();
+            
+            if (this.strandChart) {
+                this.strandChart.data.labels = Object.keys(strandCounts);
+                this.strandChart.data.datasets[0].data = Object.values(strandCounts);
+                this.strandChart.update();
+            }
 
             const cityCounts = activitiesToChart.reduce((acc, act) => {
                 acc[act.city] = (acc[act.city] || 0) + 1;
                 return acc;
             }, {});
             const sortedCities = Object.entries(cityCounts).sort(([,a],[,b]) => b-a).slice(0,10); 
-            this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
-            this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
-            this.cityChart.update();
+            
+            if (this.cityChart) {
+                this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
+                this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
+                this.cityChart.update();
+            }
         }
     };
 }
