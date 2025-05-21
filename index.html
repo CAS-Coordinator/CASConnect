@@ -363,11 +363,8 @@ function casApp() {
 
         init() {
             this.loadActivities();
-
-            this.$nextTick(() => {
-                this.setupCharts();    // Create chart instances
-                this.applyFilters();   // Apply initial filters, which will sort and then call updateCharts()
-            });
+            this.applyFilters(); 
+            this.setupCharts();
 
             const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
             const observer = new IntersectionObserver((entries) => {
@@ -383,21 +380,20 @@ function casApp() {
                 const hash = window.location.hash.substring(1);
                 if (hash) this.setActiveSection(hash);
             });
-
-            this.$nextTick(() => {
-                if (window.location.hash) {
-                    this.setActiveSection(window.location.hash.substring(1));
-                }
-            });
+            if (window.location.hash) {
+                 this.setActiveSection(window.location.hash.substring(1));
+            }
         },
 
         setActiveSection(sectionId) {
             this.activeSection = sectionId;
             const element = document.getElementById(sectionId);
             if (element) {
+                // element.scrollIntoView({ behavior: 'smooth' }); // Can be jumpy with fixed header
+                // Instead, adjust scroll position to account for fixed header
                 const headerOffset = document.querySelector('header').offsetHeight;
                 const elementPosition = element.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 10; 
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 10; // 10px buffer
                 window.scrollTo({
                      top: offsetPosition,
                      behavior: "smooth"
@@ -464,6 +460,7 @@ function casApp() {
                 const monthNumber = this.filters.month === 'June' ? 6 : 7;
                 tempActivities = tempActivities.filter(act => {
                     const actDate = new Date(act.startDate);
+                    // Check if activity spans across months or starts in the selected month
                     if (act.dates.toLowerCase().includes('june') && this.filters.month === 'June') return true;
                     if (act.dates.toLowerCase().includes('july') && this.filters.month === 'July') return true;
                     return actDate.getUTCMonth() + 1 === monthNumber;
@@ -544,34 +541,25 @@ function casApp() {
         },
 
         setupCharts() {
-            const strandCtx = document.getElementById('strandChart');
-            if (strandCtx) {
-                if (this.strandChart) { this.strandChart.destroy(); } // Destroy existing chart before creating new
-                this.strandChart = new Chart(strandCtx.getContext('2d'), {
-                    type: 'pie',
-                    data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3'] }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-                });
-            } else {
-                console.error("Canvas element with ID 'strandChart' not found.");
-            }
+            const strandCtx = document.getElementById('strandChart').getContext('2d');
+            this.strandChart = new Chart(strandCtx, {
+                type: 'pie',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ECFCCB', '#CFFAFE', '#FFE4E6', '#FEF9C3'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
 
-            const cityCtx = document.getElementById('cityChart');
-            if (cityCtx) {
-                if (this.cityChart) { this.cityChart.destroy(); } // Destroy existing chart
-                this.cityChart = new Chart(cityCtx.getContext('2d'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [{ label: 'Activities', data: [], backgroundColor: '#67E8F9' }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-                });
-            } else {
-                console.error("Canvas element with ID 'cityChart' not found.");
-            }
+            const cityCtx = document.getElementById('cityChart').getContext('2d');
+            this.cityChart = new Chart(cityCtx, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Activities', data: [], backgroundColor: '#67E8F9' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+            this.updateCharts();
         },
 
         updateCharts() {
+            // Guard clause to prevent errors if charts are not yet initialized
             if (!this.strandChart || !this.cityChart) {
-                // console.warn("Charts not fully initialized yet, skipping update.");
                 return;
             }
 
@@ -582,24 +570,18 @@ function casApp() {
                 acc[strand] = (acc[strand] || 0) + 1;
                 return acc;
             }, {});
-            
-            if (this.strandChart) {
-                this.strandChart.data.labels = Object.keys(strandCounts);
-                this.strandChart.data.datasets[0].data = Object.values(strandCounts);
-                this.strandChart.update();
-            }
+            this.strandChart.data.labels = Object.keys(strandCounts);
+            this.strandChart.data.datasets[0].data = Object.values(strandCounts);
+            this.strandChart.update();
 
             const cityCounts = activitiesToChart.reduce((acc, act) => {
                 acc[act.city] = (acc[act.city] || 0) + 1;
                 return acc;
             }, {});
-            const sortedCities = Object.entries(cityCounts).sort(([,a],[,b]) => b-a).slice(0,10); 
-            
-            if (this.cityChart) {
-                this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
-                this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
-                this.cityChart.update();
-            }
+            const sortedCities = Object.entries(cityCounts).sort(([,a],[,b]) => b-a).slice(0,10); // Top 10 cities
+            this.cityChart.data.labels = sortedCities.map(entry => entry[0]);
+            this.cityChart.data.datasets[0].data = sortedCities.map(entry => entry[1]);
+            this.cityChart.update();
         }
     };
 }
