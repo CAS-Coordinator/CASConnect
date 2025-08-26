@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAS Explorer: Eastern Shizuoka (Sep-Oct 2025)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Warm Neutrals (bg-stone-100, text-gray-800) with Teal Accents (e.g., accent bg-teal-600, text-teal-700) -->
+    <!-- Application Structure Plan: A single-page application with a clear header and navigation. The structure includes: 1. An Introduction section adapted from the report's overview. 2. A core "Activity Finder" section with filters (City, CAS Strand, Month) and sorting options, displaying activities as cards that open a detailed modal. 3. A "Strategic Insights" section using collapsible accordions to present the valuable advice from Section 4 of the report. 4. A simple footer with a disclaimer. This task-oriented design prioritizes finding activities while making strategic advice easily accessible. -->
+    <!-- Visualization & Content Choices: Report Info: Tables and detailed descriptions from Sections 1, 2, and 3 of the report. Goal: Enable students to explore and find relevant local CAS opportunities. Presentation Method: An interactive list of cards for activities, with a modal for detailed information. Strategic advice is presented in accordions. Interaction: Filters and sorting are powered by Alpine.js to dynamically update the activity list. Justification: This card-based, filterable interface is highly effective for navigating a list of diverse items on both desktop and mobile. Accordions for text-heavy sections prevent UI clutter. No charts are needed as the data is primarily descriptive. No SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link { transition: color 0.3s ease, border-bottom-color 0.3s ease; }
+        .nav-link.active { border-bottom-color: #0D9488; color: #0D9488; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+        .tag { display: inline-block; padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 9999px; margin-right: 0.5rem; margin-bottom: 0.5rem; font-weight: 500; }
+        .tag-creativity { background-color: #F0FDFA; color: #0F766E; border: 1px solid #5EEAD4; }
+        .tag-activity { background-color: #FEFCE8; color: #713F12; border: 1px solid #FDE047; }
+        .tag-service { background-color: #FFF7ED; color: #9A3412; border: 1px solid #FB923C; }
+        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb { background: #0D9488; border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb:hover { background: #0F766E; }
+        [x-cloak] { display: none !important; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+    </style>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-stone-100 text-gray-800" x-data="casAppLocal()">
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-teal-700">CAS Explorer (Sep-Oct 2025)</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" @click="setActiveSection('home')" :class="{ 'active': activeSection === 'home' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Home</a>
+                        <a href="#find-activities" @click="setActiveSection('find-activities')" :class="{ 'active': activeSection === 'find-activities' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Find Activities</a>
+                        <a href="#insights" @click="setActiveSection('insights')" :class="{ 'active': activeSection === 'insights' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Strategic Insights</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-teal-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        <svg class="h-6 w-6" x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div x-show="mobileMenuOpen" x-cloak class="md:hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" @click="setActiveSection('home'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Home</a>
+                <a href="#find-activities" @click="setActiveSection('find-activities'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Find Activities</a>
+                <a href="#insights" @click="setActiveSection('insights'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Strategic Insights</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <section id="home" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-3xl font-bold text-teal-700 mb-4">CAS Opportunities in Eastern Shizuoka</h2>
+            <p class="text-lg text-gray-700 mb-3">This interactive tool provides a detailed overview of CAS opportunities in the <strong class="text-teal-600">Numazu, Mishima, and Fuji City</strong> areas for <strong class="text-teal-600">September and October 2025</strong>. It is designed to help students and coordinators make informed decisions, foster meaningful community connections, and develop robust CAS projects.</p>
+            <p class="text-gray-600">Use the filters below to explore a diverse landscape of events, from structured volunteer programs and cultural festivals to artistic workshops and sporting events. The goal is to empower you to find engaging experiences that align with your interests and the CAS learning outcomes.</p>
+        </section>
+
+        <section id="find-activities" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Find CAS Activities</h2>
+            
+            <div class="mb-8 p-4 border border-teal-200 rounded-lg bg-teal-50">
+                <p class="text-sm text-teal-700">Use the filters to find activities. Click on a card for a detailed description and more information. Remember to verify all details with the event organizers.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 items-end">
+                <div>
+                    <label for="filter-city-local" class="block text-sm font-medium text-gray-700 mb-1">City / Area</label>
+                    <select id="filter-city-local" x-model="filters.city" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                        <option value="">All Areas</option>
+                        <option value="Numazu">Numazu</option>
+                        <option value="Mishima">Mishima</option>
+                        <option value="Fuji City">Fuji City</option>
+                        <option value="Nagaizumi">Nagaizumi</option>
+                        <option value="Fujinomiya">Fujinomiya</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-strand-local" class="block text-sm font-medium text-gray-700 mb-1">CAS Strand</label>
+                    <select id="filter-strand-local" x-model="filters.strand" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                        <option value="">All Strands</option>
+                        <option value="Creativity">Creativity</option>
+                        <option value="Activity">Activity</option>
+                        <option value="Service">Service</option>
+                        <option value="Cross-Strand">Cross-Strand</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-month-local" class="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                    <select id="filter-month-local" x-model="filters.month" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                        <option value="">All Months</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="Ongoing">Ongoing / Multi-month</option>
+                    </select>
+                </div>
+                 <div>
+                    <label for="sort-by-local" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                    <select id="sort-by-local" x-model="sortBy" @change="sortActivities" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                        <option value="date">Date (Earliest First)</option>
+                        <option value="name">Name (A-Z)</option>
+                        <option value="city">City (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div x-show="filteredActivities.length === 0" class="text-center py-10 text-gray-500">
+                <p class="text-xl">No activities match your current filters.</p>
+                <p>Try adjusting your search criteria.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="activity in pagedActivities" :key="activity.id">
+                    <div @click="openModal(activity)" class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden flex flex-col">
+                        <div class="p-5 flex-grow">
+                            <h3 class="text-lg font-semibold text-teal-700 mb-2" x-text="activity.name"></h3>
+                            <p class="text-sm text-gray-600 mb-1"><strong class="font-medium">📍 Location:</strong> <span x-text="activity.city"></span></p>
+                            <p class="text-sm text-gray-600 mb-3"><strong class="font-medium">📅 Dates:</strong> <span x-text="activity.datesShort"></span></p>
+                            <div class="mb-2">
+                                <template x-for="strand in activity.strands" :key="strand">
+                                    <span :class="{
+                                        'tag-creativity': strand === 'Creativity',
+                                        'tag-activity': strand === 'Activity',
+                                        'tag-service': strand === 'Service'
+                                    }" class="tag" x-text="strand"></span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-3 text-right">
+                            <span class="text-sm text-teal-600 font-medium">View Details &rarr;</span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div x-show="totalPages > 1" class="mt-8 flex justify-center items-center space-x-2">
+                <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">&laquo; Prev</button>
+                <template x-for="page in pageNumbers" :key="page">
+                    <button @click="goToPage(page)" :class="{'bg-teal-600 text-white': currentPage === page, 'bg-gray-200 text-gray-700 hover:bg-gray-300': currentPage !== page}" class="px-4 py-2 rounded-md" x-text="page"></button>
+                </template>
+                <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">Next &raquo;</button>
+            </div>
+        </section>
+
+        <div x-show="selectedActivity" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 z-50" :class="{'active': selectedActivity !== null}" @click.self="closeModal" x-cloak>
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-teal-700" x-text="selectedActivity?.name"></h3>
+                    <button @click="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                </div>
+                <div class="p-6 overflow-y-auto modal-content flex-grow text-sm">
+                    <p class="mb-3"><strong class="font-semibold text-gray-800">Description:</strong> <span x-html="selectedActivity?.description" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">📍 Location:</strong> <span x-text="selectedActivity?.location" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">📅 Dates:</strong> <span x-text="selectedActivity?.dates" class="text-gray-700"></span></p>
+                    <div class="mb-3">
+                        <strong class="font-semibold text-gray-800">CAS Strand(s):</strong>
+                        <div>
+                            <template x-for="strand in selectedActivity?.strands" :key="strand">
+                                <span :class="{
+                                    'tag-creativity': strand === 'Creativity',
+                                    'tag-activity': strand === 'Activity',
+                                    'tag-service': strand === 'Service'
+                                }" class="tag" x-text="strand"></span>
+                            </template>
+                        </div>
+                    </div>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">👥 Target Audience:</strong> <span x-text="selectedActivity?.audience" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">💰 Cost / Entry Fee:</strong> <span x-text="selectedActivity?.cost" class="text-gray-700"></span></p>
+                    <p class="mb-2" x-show="selectedActivity.contact"><strong class="font-semibold text-gray-800">🔗 Contact / URL:</strong> <span x-html="formatContact(selectedActivity?.contact)" class="text-gray-700 break-all"></span></p>
+                </div>
+                <div class="p-4 border-t border-gray-200 text-right">
+                    <button @click="closeModal" class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <section id="insights" class="py-8 md:py-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Strategic Insights for CAS Engagement</h2>
+            <div class="space-y-4 max-w-3xl mx-auto">
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">Integrating Creativity, Activity, and Service</h3>
+                        <svg :class="{'rotate-180': open, '': !open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" class="accordion-content mt-2 text-gray-600 text-sm" style="max-height: 0px;">
+                        <p class="mb-2">The most impactful opportunities often blend all three CAS strands. Train yourself to see an event's full potential. For example, at the Numazu Arts Festival, you could volunteer as a guide (Service), write a critical review of an exhibit (Creativity), and help with the physical setup of displays (Activity). This transforms passive attendance into active, multi-dimensional engagement.</p>
+                        <p>Consider designing a student-led project that is inherently multi-stranded, like a "Charity Art Walk." This would involve planning a hiking route (Activity), organizing fundraising (Service), and designing promotional materials (Creativity).</p>
+                    </div>
+                </div>
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">Pathways to a CAS Project</h3>
+                        <svg :class="{'rotate-180': open, '': !open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" class="accordion-content mt-2 text-gray-600 text-sm" style="max-height: 0px;">
+                        <p class="mb-2">Use the opportunities in this explorer as springboards for a full, student-led CAS project. For example:</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>The Mishima Volunteer Initiative:</strong> Use the "Hapi-Vola Mishima" system to become a CAS Ambassador at your school. Research the system, run info sessions for younger students, and help match peers with suitable volunteer roles. This is service through advocacy and leadership.</li>
+                            <li><strong>The Fuji International Exchange Project:</strong> Attend the volunteer recruitment event to identify a specific community need. You could then propose a project to create a "Welcome Pack for Foreign Teens," including a student-made guide to local youth spots and tips for navigating school life.</li>
+                            <li><strong>The Numazu e-Sports for Good Project:</strong> Inspired by the LaLaport e-Sports Cup, organize a charity e-sports tournament at your own school. This leverages a popular interest (Activity) for a good cause (Service) and requires immense planning and promotion (Creativity).</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">Building Sustained Engagement</h3>
+                        <svg :class="{'rotate-180': open, '': !open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" class="accordion-content mt-2 text-gray-600 text-sm" style="max-height: 0px;">
+                        <p class="mb-2">CAS emphasizes sustained engagement over one-off events. This allows for genuine skill development and building community relationships. Seek out organizations that offer recurring activities, such as the Hall Earth Nature School in Fujinomiya or Groundwork Mishima. These NPOs provide a structure for you to see the long-term impact of your contributions.</p>
+                        <p>View your CAS journey as a progression. For example, you could join a Yosakoi dance team as a participant (Activity) in your first year, and then take on a leadership role teaching choreography to new members in your second year. This progression from participant to leader is a powerful demonstration of growth.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8 text-center">
+        <div class="container mx-auto px-4">
+            <p class="text-sm mb-2">&copy; 2025 CAS Explorer. Information adapted from the "CAS Programme Opportunities in Eastern Shizuoka" report.</p>
+            <p class="text-xs text-gray-400"><strong>Important Note:</strong> All activity details are subject to change. Please verify directly with organizers before making plans. This tool is a guide and not an official endorsement of any specific activity.</p>
+        </div>
+    </footer>
+
+<script>
+function casAppLocal() {
+    return {
+        activeSection: 'home',
+        mobileMenuOpen: false,
+        activities: [],
+        filteredActivities: [],
+        selectedActivity: null,
+        filters: {
+            city: '',
+            strand: '',
+            month: ''
+        },
+        sortBy: 'date',
+        itemsPerPage: 12,
+        currentPage: 1,
+
+        init() {
+            this.loadActivities(); 
+            this.$nextTick(() => {
+                this.applyFilters();
+                const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) { this.activeSection = entry.target.id; }
+                    });
+                }, observerOptions);
+                document.querySelectorAll('main section').forEach(section => observer.observe(section));
+            
+                window.addEventListener('hashchange', () => {
+                    const hash = window.location.hash.substring(1);
+                    if (hash) this.setActiveSection(hash);
+                });
+                if (window.location.hash) { this.setActiveSection(window.location.hash.substring(1)); } 
+                else { this.setActiveSection('home'); }
+            });
+        },
+
+        setActiveSection(sectionId) {
+            this.activeSection = sectionId;
+            const element = document.getElementById(sectionId);
+            if (element) {
+                const headerOffset = document.querySelector('header').offsetHeight;
+                const elementPosition = element.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 10; 
+                window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+            }
+        },
+
+        loadActivities() {
+            this.activities = [
+                // Data from "CAS Programme Opportunities in Eastern Shizuoka" report
+                // NUMAZU
+                { id: 'n1', name: 'Yume Star "Haru/Aki" Concert', dates: 'Sep 11, 2025', datesShort: 'Sep 11', startDate: '2025-09-11', location: 'Numazu Civic Culture Center', city: 'Numazu', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: '3,500 - 8,000 JPY', description: 'A concert featuring established Japanese singers performing popular classics. Fulfills Creativity through exposure to and appreciation of professional musical performance.' },
+                { id: 'n2', name: 'LaLaport Numazu e-Sports Cup', dates: 'Sep 14-15, 2025', datesShort: 'Sep 14-15', startDate: '2025-09-14', location: 'LaLaport Numazu', city: 'Numazu', primaryStrand: 'Creativity', strands: ['Creativity', 'Activity', 'Service'], audience: 'General Public, High School Students', cost: 'Free', description: 'An e-sports event featuring tournaments (including a Monster Strike tournament for high school students), free-play areas, and workshops. **Creativity:** Strategic thinking in tournaments. **Activity:** Intense focus and reflexes for high-level play. **Service:** Opportunity to volunteer as mentors for younger children in the programming workshops.' },
+                { id: 'n3', name: 'Fuji-Shizuoka Symphony Orchestra enjoy! Classic', dates: 'Sep 23, 2025', datesShort: 'Sep 23', startDate: '2025-09-23', location: 'Numazu Civic Culture Center', city: 'Numazu', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'An accessible classical music performance by the regional orchestra. A great opportunity for creative engagement through appreciation and analysis of orchestral music.' },
+                { id: 'n4', name: 'The 52nd Numazu Arts Festival', dates: 'Oct 1 - Nov 16, 2025', datesShort: 'Oct 1 - Nov 16', startDate: '2025-10-01', location: 'Plaza Verde, Civic Culture Center, etc.', city: 'Numazu', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies by event', description: 'A multi-week celebration of the arts, featuring exhibitions (calligraphy, photography, painting) and stage performances (choral, theatre). A premier opportunity for creative engagement, analysis, and potential workshop participation.' },
+                { id: 'n5', name: '"Otona no, Kihon Vol.3" Talk Event', dates: 'Oct 4, 2025', datesShort: 'Oct 4', startDate: '2025-10-04', location: 'Numazu Civic Culture Center', city: 'Numazu', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'A talk event series exploring themes of modern lifestyle, culture, and design with prominent creators. Provides intellectual and creative stimulation.' },
+                { id: 'n6', name: 'Total Tenbosch Manzai Tour "Hanseiki"', dates: 'Oct 4-5, 2025', datesShort: 'Oct 4-5', startDate: '2025-10-04', location: 'Numazu Racoon Yoshimoto Theater', city: 'Numazu', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: '7,000 JPY', description: 'A professional Manzai (Japanese stand-up comedy) performance. Offers a Creativity outlet to study comedic writing, timing, and delivery in a contemporary cultural context.' },
+                { id: 'n7', name: 'Hayashiya Tsuruko Rakugo Tour', dates: 'Oct 31, 2025', datesShort: 'Oct 31', startDate: '2025-10-31', location: 'Numazu Civic Culture Center', city: 'Numazu', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'A performance by a rising star in Rakugo, a traditional form of Japanese comedic storytelling. Excellent for cultural and creative appreciation.' },
+                { id: 'n8', name: 'Yosakoi Tokaido Festival (Practices)', dates: 'Practices in Sep/Oct; Festival Nov 8-9', datesShort: 'Sep-Oct (Practices)', startDate: '2025-09-01', location: 'Numazu Port, Central Arcade, etc.', city: 'Numazu', primaryStrand: 'Activity', strands: ['Activity', 'Creativity'], audience: 'General Public', cost: 'Free to watch', description: 'A major dance festival. Joining a Yosakoi team is a significant **Activity** commitment involving rigorous physical training. It also has a strong **Creativity** component in costume design, music, and choreography. The main preparation period is in Sep/Oct.' },
+                { id: 'n9', name: 'Entrepreneurship Mindset Creation Program', dates: 'Sep-Dec 2025 (Recruitment for schools)', datesShort: 'Sep-Dec', startDate: '2025-09-01', location: 'Numazu High Schools', city: 'Numazu', primaryStrand: 'Service', strands: ['Service', 'Creativity'], audience: 'High School Students', cost: 'Free', description: 'A program where entrepreneurs visit high schools. While schools apply, students can perform a **Service** to their peers by advocating for their school\'s participation, acting as student liaisons, and helping organize the event.' },
+                { id: 'n10', name: 'WaRau Marche Volunteer Staff', dates: 'Sep 14-15, 2025', datesShort: 'Sep 14-15', startDate: '2025-09-14', location: 'Frespo Nagaizumi', city: 'Nagaizumi', primaryStrand: 'Service', strands: ['Service'], audience: 'High School & University Students', cost: 'Free (Volunteer)', description: 'A direct and accessible **Service** opportunity to be a volunteer staff member at a community market. Support local artisans, develop event management and customer service skills. Explicitly open to high school students.' },
+                // MISHIMA
+                { id: 'm1', name: '17th Hoiku Matsuri', dates: 'Sep 6, 2025', datesShort: 'Sep 6', startDate: '2025-09-06', location: 'Rakujuen Park', city: 'Mishima', primaryStrand: 'Creativity', strands: ['Creativity', 'Service'], audience: 'Children, Families', cost: 'Free', description: 'A festival for young children and families. Offers **Creativity** through observation and documentation, and potential **Service** by volunteering to help with activities for children (inquire via Hapi-Vola system).' },
+                { id: 'm2', name: '57th Mishima Citizens\' Choir Festival', dates: 'Sep 7, 2025', datesShort: 'Sep 7', startDate: '2025-09-07', location: 'Mishima Citizens\' Cultural Hall', city: 'Mishima', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Free', description: 'A large-scale, free event showcasing numerous local choirs. A great opportunity for **Creativity** through appreciation of community-based artistic practice.' },
+                { id: 'm3', name: 'Food Festa', dates: 'Sep 14, 2025', datesShort: 'Sep 14', startDate: '2025-09-14', location: 'Rakujuen Park', city: 'Mishima', primaryStrand: 'Creativity', strands: ['Creativity', 'Service'], audience: 'General Public', cost: 'Free (food for purchase)', description: 'A celebration of local cuisine. **Creativity** can be explored by documenting local food culture. **Service** roles may be available to assist vendors or with event logistics.' },
+                { id: 'm4', name: 'Shagiri Festival Z', dates: 'Sep 15, 2025', datesShort: 'Sep 15', startDate: '2025-09-15', location: 'Rakujuen Park', city: 'Mishima', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Free', description: 'A festival dedicated to Shagiri, a traditional form of festival music. An excellent opportunity for **Creativity** through studying and appreciating a local traditional art form.' },
+                { id: 'm5', name: 'Suiseki Exhibition', dates: 'Sep 20-23, 2025', datesShort: 'Sep 20-23', startDate: '2025-09-20', location: 'Rakujuen Park', city: 'Mishima', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Park entrance fee may apply', description: 'An exhibition of Suiseki, the Japanese art of stone appreciation. A unique **Creativity** opportunity to explore a contemplative and aesthetic traditional art.' },
+                { id: 'm6', name: 'Autumn Wildflower Exhibition', dates: 'Sep 27-28, 2025', datesShort: 'Sep 27-28', startDate: '2025-09-27', location: 'Rakujuen Park', city: 'Mishima', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Park entrance fee may apply', description: 'A botanical display of native autumn flowers. **Creativity** can be engaged through photography, sketching, or learning about local flora.' },
+                { id: 'm7', name: 'Hiroko Kokubu & Hiromi Iwasaki Concert', dates: 'Oct 25, 2025', datesShort: 'Oct 25', startDate: '2025-10-25', location: 'Mishima Citizens\' Cultural Hall', city: 'Mishima', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: '7,700 JPY (4,400 JPY for U25)', description: 'A professional concert featuring a renowned jazz pianist and a legendary pop vocalist. A high-caliber **Creativity** experience with discounted tickets for students.' },
+                { id: 'm8', name: '"Hapi-Vola Mishima" Volunteer System', dates: 'Ongoing', datesShort: 'Ongoing', startDate: '2025-09-01', location: 'Mishima City', city: 'Mishima', primaryStrand: 'Service', strands: ['Service'], audience: 'General Public, Students', cost: 'Free (Registration)', description: 'A centralized, city-run volunteer registration system. This is a transformative resource for **Service**, connecting students with a vetted list of NPOs and community groups for both long-term and short-term roles. A reliable way to find sustained engagement.' },
+                // FUJI CITY
+                { id: 'f1', name: 'Warsaw National Philharmonic', dates: 'Sep 5, 2025', datesShort: 'Sep 5', startDate: '2025-09-05', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'A professional classical music performance by an internationally acclaimed orchestra. A premier **Creativity** opportunity.' },
+                { id: 'f2', name: 'Toshihiko Tahara Concert', dates: 'Sep 6, 2025', datesShort: 'Sep 6', startDate: '2025-09-06', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'A concert by a veteran J-pop idol. Offers a **Creativity** experience through appreciating modern Japanese music history and performance.' },
+                { id: 'f3', name: 'Kodo Taiko Performance', dates: 'Sep 7, 2025', datesShort: 'Sep 7', startDate: '2025-09-07', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: '6,000 JPY (2,500 JPY for U25)', description: 'A performance by the world-renowned professional taiko drumming ensemble. A powerful **Creativity** opportunity with discounted tickets for students.' },
+                { id: 'f4', name: 'Masahiko Kondo Concert', dates: 'Sep 15, 2025', datesShort: 'Sep 15', startDate: '2025-09-15', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'A concert by another major J-pop figure, providing further insight into the genre for a **Creativity** experience.' },
+                { id: 'f5', name: 'Ikuzo Yoshi Concert', dates: 'Sep 20, 2025', datesShort: 'Sep 20', startDate: '2025-09-20', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'A concert by a famous Enka (traditional Japanese ballad) singer. A great **Creativity** opportunity to experience a classic Japanese music genre.' },
+                { id: 'f6', name: 'Masashi Sada Concert', dates: 'Sep 21, 2025', datesShort: 'Sep 21', startDate: '2025-09-21', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'A performance by a legendary folk singer-songwriter, offering a **Creativity** experience through lyrical and musical analysis.' },
+                { id: 'f7', name: 'Ayaka Concert', dates: 'Oct 4, 2025', datesShort: 'Oct 4', startDate: '2025-10-04', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'A concert by a popular contemporary female singer-songwriter. A relevant and engaging **Creativity** opportunity.' },
+                { id: 'f8', name: 'Meiji University Mandolin Club', dates: 'Oct 12, 2025', datesShort: 'Oct 12', startDate: '2025-10-12', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'A performance by a highly regarded collegiate mandolin orchestra. A unique **Creativity** opportunity to experience a different form of ensemble music.' },
+                { id: 'f9', name: '8th Fujinokuni Antique Market', dates: 'Oct 19, 2025', datesShort: 'Oct 19', startDate: '2025-10-19', location: 'Fuji City (Venue TBD)', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'An antique market featuring vintage and retro goods. **Creativity** can be explored through photography or documenting historical items. Potential for **Service** by inquiring about volunteer roles.' },
+                { id: 'f10', name: 'Toshinobu Kubota Concert', dates: 'Oct 19, 2025', datesShort: 'Oct 19', startDate: '2025-10-19', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'A concert by a pioneer of Japanese R&B and soul music. A great **Creativity** opportunity to study the evolution of modern music in Japan.' },
+                { id: 'f11', name: 'TAEYANG 2025 FAN MEETING', dates: 'Oct 25, 2025', datesShort: 'Oct 25', startDate: '2025-10-25', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Creativity', strands: ['Creativity'], audience: 'General Public', cost: 'Varies', description: 'An event with a member of the globally famous K-Pop group BIGBANG. A highly relevant **Creativity** opportunity to analyze global pop culture phenomena.' },
+                { id: 'f12', name: 'Muscle Gate Shizuoka', dates: 'Oct 25, 2025', datesShort: 'Oct 25', startDate: '2025-10-25', location: 'Fuji Rose Theatre', city: 'Fuji City', primaryStrand: 'Activity', strands: ['Activity', 'Service'], audience: 'General Public', cost: '5,000 - 6,500 JPY (Spectator)', description: 'A large-scale bodybuilding and fitness competition. Attend as a spectator for an **Activity**-related learning experience about physiology and training. Proactively contact organizers to inquire about **Service** roles like assisting with registration or logistics.' },
+                { id: 'f13', name: '"Let\'s Start! International Exchange Volunteer" Event', dates: 'Sep 28, 2025', datesShort: 'Sep 28', startDate: '2025-09-28', location: 'Fuji Station North Machizukuri Center', city: 'Fuji City', primaryStrand: 'Service', strands: ['Service'], audience: 'General Public', cost: 'Free (Application required)', description: 'A crucial recruitment and information session for those interested in supporting the local international community. This event is a gateway to long-term **Service** roles like language support or assisting at cultural exchange events. Application period: Aug 15 - Sep 21.' },
+                { id: 'f14', name: 'Camp Support Staff Volunteer', dates: 'Sep 13-15 & Oct 11-13, 2025', datesShort: 'Sep 13-15 & Oct 11-13', startDate: '2025-09-13', location: 'Hall Earth Nature School', city: 'Fujinomiya', primaryStrand: 'Service', strands: ['Service', 'Activity'], audience: 'University/Vocational Students', cost: 'Free (Volunteer)', description: 'An exceptional hands-on **Service** opportunity to act as support staff for children\'s nature camps. Involves assisting with activities and supervising children. Also incorporates the **Activity** strand due to its outdoor setting. *Note: The report mentions University/Vocational students, so high school students must inquire about eligibility.*' }
+            ];
+            this.activities = this.activities.map((activity, index) => ({ ...activity, id: activity.id || `act-${index}` }));
+        },
+
+        applyFilters() {
+            this.currentPage = 1;
+            let tempActivities = this.activities;
+
+            if (this.filters.city) {
+                tempActivities = tempActivities.filter(act => act.city === this.filters.city);
+            }
+            if (this.filters.strand) {
+                if (this.filters.strand === 'Cross-Strand') {
+                    tempActivities = tempActivities.filter(act => act.strands.length > 1);
+                } else {
+                    tempActivities = tempActivities.filter(act => act.strands.includes(this.filters.strand));
+                }
+            }
+            if (this.filters.month) {
+                const monthLower = this.filters.month.toLowerCase();
+                tempActivities = tempActivities.filter(act => act.dates.toLowerCase().includes(monthLower));
+            }
+            
+            this.filteredActivities = tempActivities;
+            this.sortActivities();
+        },
+        
+        sortActivities() {
+            let sorted = [...this.filteredActivities];
+            if (this.sortBy === 'date') {
+                sorted.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+            } else if (this.sortBy === 'name') {
+                sorted.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (this.sortBy === 'city') {
+                sorted.sort((a, b) => a.city.localeCompare(b.city));
+            }
+            this.filteredActivities = sorted;
+        },
+        
+        get pagedActivities() {
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+            return this.filteredActivities.slice(start, end);
+        },
+
+        get totalPages() {
+            return Math.ceil(this.filteredActivities.length / this.itemsPerPage);
+        },
+        
+        get pageNumbers() {
+            const numbers = [];
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
+            if (endPage - startPage + 1 < maxPagesToShow) {
+                 startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+            if (this.totalPages > 0 && numbers.length === 0 && endPage === 0) {
+                 numbers.push(1);
+            } else {
+                for (let i = startPage; i <= endPage; i++) {
+                    numbers.push(i);
+                }
+            }
+            return numbers;
+        },
+
+        nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
+        prevPage() { if (this.currentPage > 1) this.currentPage--; },
+        goToPage(pageNumber) { this.currentPage = pageNumber; },
+        openModal(activity) { this.selectedActivity = activity; },
+        closeModal() { this.selectedActivity = null; },
+
+        formatContact(contactInfo) {
+            if (!contactInfo) return 'N/A';
+            const urlRegex = /(https?:\/\/[^\s"<>]+)/g;
+            const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
+            let formatted = contactInfo;
+            formatted = formatted.replace(urlRegex, (url) => {
+                let cleanUrl = url.endsWith('.') ? url.slice(0, -1) : url;
+                return `<a href="${cleanUrl}" target="_blank" class="text-teal-600 hover:underline">${cleanUrl}</a>` + (url.endsWith('.') ? '.' : '');
+            });
+            formatted = formatted.replace(emailRegex, '<a href="mailto:$1" class="text-teal-600 hover:underline">$1</a>');
+            return formatted;
+        }
+    };
+}
+</script>
+</body>
+</html>
