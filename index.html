@@ -1,56 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAS Explorer (Shizuoka Nov-Dec 2025)</title>
+    <title>CAS Explorer: Eastern Shizuoka (Nov-Dec 2025)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <!-- Chosen Palette: Warm Neutrals with Soft Teal Accents -->
-    <!-- Application Structure Plan: A clean, single-page application structure. It starts with a welcoming introduction (from the report's foreword). The core is the 'Find Activities' section, which is an interactive tool with filters (Strand, City, Month) and sorting, displaying results as cards with a modal for details. This is followed by a 'Resources' section for further local contacts. This structure is task-oriented, prioritizing the student's need to find information quickly. -->
-    <!-- Visualization & Content Choices: Report Data (Activity List) -> Goal: Exploration & Filtering -> Presentation: Interactive card list (HTML/Tailwind/Alpine.js). Report Data (Activity Details) -> Goal: In-depth Info -> Presentation: Modal popup (JS toggle). Report Data (Local Contacts) -> Goal: Further Action -> Presentation: Simple list. No charts are included to maintain focus and avoid potential rendering errors. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .nav-link { transition: color 0.3s ease, border-bottom-color 0.3s ease; }
-        .nav-link.active { border-bottom-color: #0D9488; color: #0D9488; }
-        .modal { display: none; }
-        .modal.active { display: flex; }
-        .tag { display: inline-block; padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 9999px; margin-right: 0.5rem; margin-bottom: 0.5rem; }
-        .tag-creativity { background-color: #ECFCCB; color: #4D7C0F; border: 1px solid #A3E635; }
-        .tag-activity { background-color: #CFFAFE; color: #0E7490; border: 1px solid #67E8F9; }
-        .tag-service { background-color: #FFE4E6; color: #BE123C; border: 1px solid #FDA4AF; }
-        .modal-content::-webkit-scrollbar { width: 8px; }
-        .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .modal-content::-webkit-scrollbar-thumb { background: #0D9488; border-radius: 10px; }
-        .modal-content::-webkit-scrollbar-thumb:hover { background: #0F766E; }
-        [x-cloak] { display: none !important; }
+       .nav-link { transition: color 0.3s ease, border-bottom-color 0.3s ease; }
+       .nav-link.active { border-bottom-color: #0D9488; color: #0D9488; }
+       .modal { display: none; }
+       .modal.active { display: flex; }
+       .tag { display: inline-block; padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 9999px; margin-right: 0.5rem; margin-bottom: 0.5rem; font-weight: 500; }
+       .tag-creativity { background-color: #F0FDFA; color: #0F766E; border: 1px solid #5EEAD4; }
+       .tag-activity { background-color: #FEFCE8; color: #713F12; border: 1px solid #FDE047; }
+       .tag-service { background-color: #FFF7ED; color: #9A3412; border: 1px solid #FB923C; }
+       .modal-content::-webkit-scrollbar { width: 8px; }
+       .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+       .modal-content::-webkit-scrollbar-thumb { background: #0D9488; border-radius: 10px; }
+       .modal-content::-webkit-scrollbar-thumb:hover { background: #0F766E; }
+        [x-cloak] { display: none!important; }
+       .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
     </style>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-stone-100 text-gray-800" x-data="casApp()">
+<body class="bg-stone-100 text-gray-800" x-data="casAppLocal()">
     <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex-shrink-0">
-                    <h1 class="text-xl font-bold text-teal-700">CAS Explorer</h1>
-                    <span class="text-sm text-gray-500">Nov-Dec 2025</span>
+                    <h1 class="text-xl font-bold text-teal-700">CAS Explorer (Nov-Dec 2025)</h1>
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="#home" @click="setActiveSection('home')" :class="{ 'active': activeSection === 'home' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Home</a>
                         <a href="#find-activities" @click="setActiveSection('find-activities')" :class="{ 'active': activeSection === 'find-activities' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Find Activities</a>
-                        <a href="#resources" @click="setActiveSection('resources')" :class="{ 'active': activeSection === 'resources' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Resources</a>
+                        <a href="#insights" @click="setActiveSection('insights')" :class="{ 'active': activeSection === 'insights' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-600">Strategic Insights</a>
                     </div>
                 </div>
                 <div class="md:hidden">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-teal-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500" aria-controls="mobile-menu" aria-expanded="false">
+                    <button @click="mobileMenuOpen =!mobileMenuOpen" type="button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-teal-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500" aria-controls="mobile-menu" aria-expanded="false">
                         <span class="sr-only">Open main menu</span>
-                        <svg class="block h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg class="h-6 w-6" x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <svg class="block h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        <svg class="h-6 w-6" x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
             </div>
@@ -59,57 +51,60 @@
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="#home" @click="setActiveSection('home'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Home</a>
                 <a href="#find-activities" @click="setActiveSection('find-activities'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Find Activities</a>
-                <a href="#resources" @click="setActiveSection('resources'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Resources</a>
+                <a href="#insights" @click="setActiveSection('insights'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-50">Strategic Insights</a>
             </div>
         </div>
     </header>
 
     <main class="container mx-auto p-4 sm:p-6 lg:p-8">
         <section id="home" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 class="text-3xl font-bold text-teal-700 mb-4">Welcome to the CAS Activity Explorer!</h2>
-            <p class="text-lg text-gray-700 mb-3">This tool helps you find local CAS opportunities in the Numazu, Mishima, and Fuji City areas for <strong class="text-teal-600">November and December 2025</strong>.</p>
-            <p class="text-gray-600">The goal is to provide a starting point. The best CAS experiences often come from your own initiative. Use these listings to get inspired, connect with local organizations, and plan meaningful projects. Remember to always verify details with the organizers.</p>
+            <h2 class="text-3xl font-bold text-teal-700 mb-4">CAS Opportunities in Eastern Shizuoka</h2>
+            <p class="text-lg text-gray-700 mb-3">This interactive tool provides a detailed overview of CAS opportunities in the <strong class="text-teal-600">Numazu, Mishima, and Fuji City</strong> areas for <strong class="text-teal-600">November and December 2025</strong>. It is designed to help students and coordinators make informed decisions, foster meaningful community connections, and develop robust CAS projects.</p>
+            <p class="text-gray-600">Use the filters below to explore a diverse landscape of events, from structured volunteer programs and cultural festivals to artistic workshops and sporting events. The goal is to empower you to find engaging experiences that align with your interests and the CAS learning outcomes.</p>
         </section>
 
         <section id="find-activities" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Find CAS Activities (Nov-Dec 2025)</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Find CAS Activities</h2>
             
             <div class="mb-8 p-4 border border-teal-200 rounded-lg bg-teal-50">
-                <p class="text-sm text-teal-700">Use the filters below to find activities. This list focuses on hands-on, participatory events and excludes passive appreciation (like concerts). Click on an activity card for more details.</p>
+                <p class="text-sm text-teal-700">Use the filters to find activities. Click on a card for a detailed description and more information. Remember to verify all details with the event organizers.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 items-end">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 items-end">
                 <div>
-                    <label for="filter-strand" class="block text-sm font-medium text-gray-700 mb-1">CAS Strand</label>
-                    <select id="filter-strand" x-model="filters.strand" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                    <label for="filter-city-local" class="block text-sm font-medium text-gray-700 mb-1">City / Area</label>
+                    <select id="filter-city-local" x-model="filters.city" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                        <option value="">All Areas</option>
+                        <option value="Numazu">Numazu</option>
+                        <option value="Mishima">Mishima</option>
+                        <option value="Fuji City">Fuji City</option>
+                        <option value="Nagaizumi">Nagaizumi</option>
+                        <option value="Fujinomiya">Fujinomiya</option>
+                        <option value="Greater Fuji Area">Greater Fuji Area</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-strand-local" class="block text-sm font-medium text-gray-700 mb-1">CAS Strand</label>
+                    <select id="filter-strand-local" x-model="filters.strand" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
                         <option value="">All Strands</option>
                         <option value="Creativity">Creativity</option>
                         <option value="Activity">Activity</option>
                         <option value="Service">Service</option>
+                        <option value="Cross-Strand">Cross-Strand</option>
                     </select>
                 </div>
                 <div>
-                    <label for="filter-city" class="block text-sm font-medium text-gray-700 mb-1">City/Area</label>
-                    <select id="filter-city" x-model="filters.city" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
-                        <option value="">All Cities</option>
-                        <option value="Fuji City">Fuji City</option>
-                        <option value="Mishima">Mishima</option>
-                        <option value="Numazu">Numazu</option>
-                        <option value="Ashitaka">Ashitaka</option>
-                        <option value="Regional">Regional</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="filter-month" class="block text-sm font-medium text-gray-700 mb-1">Month</label>
-                    <select id="filter-month" x-model="filters.month" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                    <label for="filter-month-local" class="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                    <select id="filter-month-local" x-model="filters.month" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
                         <option value="">All Months</option>
                         <option value="November">November</option>
                         <option value="December">December</option>
+                        <option value="Ongoing">Ongoing</option>
                     </select>
                 </div>
-                <div>
-                    <label for="sort-by" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-                    <select id="sort-by" x-model="sortBy" @change="sortActivities" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
+                 <div>
+                    <label for="sort-by-local" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                    <select id="sort-by-local" x-model="sortBy" @change="sortActivities" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500">
                         <option value="date">Date (Earliest First)</option>
                         <option value="name">Name (A-Z)</option>
                         <option value="city">City (A-Z)</option>
@@ -127,7 +122,7 @@
                     <div @click="openModal(activity)" class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden flex flex-col">
                         <div class="p-5 flex-grow">
                             <h3 class="text-lg font-semibold text-teal-700 mb-2" x-text="activity.name"></h3>
-                            <p class="text-sm text-gray-600 mb-1"><strong class="font-medium">📍 City:</strong> <span x-text="activity.city"></span></p>
+                            <p class="text-sm text-gray-600 mb-1"><strong class="font-medium">📍 Location:</strong> <span x-text="activity.city"></span></p>
                             <p class="text-sm text-gray-600 mb-3"><strong class="font-medium">📅 Dates:</strong> <span x-text="activity.datesShort"></span></p>
                             <div class="mb-2">
                                 <template x-for="strand in activity.strands" :key="strand">
@@ -149,21 +144,22 @@
             <div x-show="totalPages > 1" class="mt-8 flex justify-center items-center space-x-2">
                 <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">&laquo; Prev</button>
                 <template x-for="page in pageNumbers" :key="page">
-                    <button @click="goToPage(page)" :class="{'bg-teal-600 text-white': currentPage === page, 'bg-gray-200 text-gray-700 hover:bg-gray-300': currentPage !== page}" class="px-4 py-2 rounded-md" x-text="page"></button>
+                    <button @click="goToPage(page)" :class="{'bg-teal-600 text-white': currentPage === page, 'bg-gray-200 text-gray-700 hover:bg-gray-300': currentPage!== page}" class="px-4 py-2 rounded-md" x-text="page"></button>
                 </template>
                 <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">Next &raquo;</button>
             </div>
         </section>
 
-        <div x-show="selectedActivity" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 z-50" :class="{'active': selectedActivity !== null}" @click.self="closeModal" x-cloak>
+        <div x-show="selectedActivity" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 z-50" :class="{'active': selectedActivity!== null}" @click.self="closeModal" x-cloak>
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div class="flex justify-between items-center p-4 border-b border-gray-200">
                     <h3 class="text-xl font-semibold text-teal-700" x-text="selectedActivity?.name"></h3>
-                    <button @click="closeModal" class="text-gray-500 hover:text-gray-700">&times;</button>
+                    <button @click="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+
                 </div>
-                <div class="p-6 overflow-y-auto modal-content flex-grow">
-                    <p class="mb-3 text-gray-700"><strong class="font-semibold text-gray-800">Description:</strong> <span x-html="selectedActivity?.description"></span></p>
-                    <p class="mb-2"><strong class="font-semibold text-gray-800">📍 City/Area:</strong> <span x-text="selectedActivity?.city" class="text-gray-700"></span></p>
+                <div class="p-6 overflow-y-auto modal-content flex-grow text-sm">
+                    <p class="mb-3"><strong class="font-semibold text-gray-800">Description:</strong> <span x-html="selectedActivity?.description" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">📍 Location:</strong> <span x-text="selectedActivity?.location" class="text-gray-700"></span></p>
                     <p class="mb-2"><strong class="font-semibold text-gray-800">📅 Dates:</strong> <span x-text="selectedActivity?.dates" class="text-gray-700"></span></p>
                     <div class="mb-3">
                         <strong class="font-semibold text-gray-800">CAS Strand(s):</strong>
@@ -177,10 +173,9 @@
                             </template>
                         </div>
                     </div>
-                    <p class="mb-2" x-show="selectedActivity?.potentialLOs"><strong class="font-semibold text-gray-800">Potential Learning Outcomes:</strong> <span x-text="selectedActivity?.potentialLOs" class="text-gray-700"></span></p>
-                    <p class="mb-2"><strong class="font-semibold text-gray-800">🔗 URL/Contact:</strong> <span x-html="formatContact(selectedActivity?.contact)" class="text-gray-700"></span></p>
-                    <p class="mb-2"><strong class="font-semibold text-gray-800">💰 Application Cost:</strong> <span x-text="selectedActivity?.cost" class="text-gray-700"></span></p>
-                    <p class="mb-2"><strong class="font-semibold text-gray-800">⏳ Application Deadline:</strong> <span x-text="selectedActivity?.deadline" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">👥 Target Audience:</strong> <span x-text="selectedActivity?.audience" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">💰 Cost / Entry Fee:</strong> <span x-text="selectedActivity?.cost" class="text-gray-700"></span></p>
+                    <p class="mb-2" x-show="selectedActivity.contact"><strong class="font-semibold text-gray-800">🔗 Contact / URL:</strong> <span x-html="formatContact(selectedActivity?.contact)" class="text-gray-700 break-all"></span></p>
                 </div>
                 <div class="p-4 border-t border-gray-200 text-right">
                     <button @click="closeModal" class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700">Close</button>
@@ -188,39 +183,56 @@
             </div>
         </div>
 
-        <section id="resources" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Further Resources & Next Steps</h2>
-            <div class="max-w-3xl mx-auto text-gray-700">
-                <p class="mb-4">This list is a starting point. For ongoing and emergent opportunities, especially for Service, contact these local organizations directly:</p>
-                <ul class="list-disc list-inside space-y-3 mb-4">
-                    <li><strong>Social Welfare Councils (Shakai Fukushi Kyougikai 社会福祉協議会):</strong> These are your best resource for local, authentic volunteer needs.
-                        <ul class="list-circle list-inside ml-4 mt-1 space-y-1">
-                            <li>Numazu City Volunteer Center: 055-922-1500</li>
-                            <li>Mishima City Council of Social Welfare: 055-972-3221</li>
-                            <li>Fuji City Council of Social Welfare: 0545-64-4649</li>
+        <section id="insights" class="py-8 md:py-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Strategic Insights for CAS Engagement</h2>
+            <div class="space-y-4 max-w-3xl mx-auto">
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open =!open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">Integrating Creativity, Activity, and Service</h3>
+                        <svg :class="{'rotate-180': open, '':!open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" class="accordion-content mt-2 text-gray-600 text-sm" :class="{'open': open}">
+                        <p class="mb-2">The most impactful opportunities often blend all three CAS strands. Train yourself to see an event's full potential. For example, at the Numazu Arts Festival, you could volunteer as a guide (Service), write a critical review of an exhibit (Creativity), and help with the physical setup of displays (Activity). This transforms passive attendance into active, multi-dimensional engagement.</p>
+                        <p>Consider designing a student-led project that is inherently multi-stranded, like a "Charity Art Walk." This would involve planning a hiking route (Activity), organizing fundraising (Service), and designing promotional materials (Creativity).</p>
+                    </div>
+                </div>
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open =!open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">Pathways to a CAS Project</h3>
+                        <svg :class="{'rotate-180': open, '':!open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" class="accordion-content mt-2 text-gray-600 text-sm" :class="{'open': open}">
+                        <p class="mb-2">Use the opportunities in this explorer as springboards for a full, student-led CAS project. For example:</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>The Mishima Volunteer Initiative:</strong> Use the "Hapi-Vola Mishima" system to become a CAS Ambassador at your school. Research the system, run info sessions for younger students, and help match peers with suitable volunteer roles. This is service through advocacy and leadership.</li>
+                            <li><strong>The Fuji International Exchange Project:</strong> Attend the volunteer recruitment event to identify a specific community need. You could then propose a project to create a "Welcome Pack for Foreign Teens," including a student-made guide to local youth spots and tips for navigating school life.</li>
+                            <li><strong>The Numazu e-Sports for Good Project:</strong> Inspired by the LaLaport e-Sports Cup, organize a charity e-sports tournament at your own school. This leverages a popular interest (Activity) for a good cause (Service) and requires immense planning and promotion (Creativity).</li>
                         </ul>
-                    </li>
-                    <li><strong>Groundwork Mishima:</strong> Excellent for hands-on environmental service. Check their schedule for regular cleanups.
-                         <ul class="list-circle list-inside ml-4 mt-1 space-y-1">
-                            <li>Phone: 055-983-0136 / Website: gwmishima.jp</li>
-                        </ul>
-                    </li>
-                     <li><strong>City Halls (Shimin Katsudo / Civic Collaboration Depts):</strong> Check your city's official website for event calendars and calls for volunteers for festivals or community projects.</li>
-                </ul>
-                <p class="font-semibold text-teal-700">Remember to take initiative! The most rewarding CAS journeys are often student-driven. Discuss your ideas with your CAS Coordinator.</p>
+                    </div>
+                </div>
+                 <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open =!open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-teal-700">Building Sustained Engagement</h3>
+                        <svg :class="{'rotate-180': open, '':!open}" class="w-5 h-5 text-teal-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" class="accordion-content mt-2 text-gray-600 text-sm" :class="{'open': open}">
+                        <p class="mb-2">CAS emphasizes sustained engagement over one-off events. This allows for genuine skill development and building community relationships. Seek out organizations that offer recurring activities, such as the Hall Earth Nature School in Fujinomiya or Groundwork Mishima. These NPOs provide a structure for you to see the long-term impact of your contributions.</p>
+                        <p>View your CAS journey as a progression. For example, you could join a Yosakoi dance team as a participant (Activity) in your first year, and then take on a leadership role teaching choreography to new members in your second year. This progression from participant to leader is a powerful demonstration of growth.</p>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
 
     <footer class="bg-gray-800 text-white py-8 text-center">
         <div class="container mx-auto px-4">
-            <p class="text-sm mb-2">&copy; 2025 CAS Activity Explorer. Information based on public event data for Nov/Dec 2025.</p>
-            <p class="text-xs text-gray-400"><strong>Important Note:</strong> All activity details (dates, costs, availability) are subject to change. Please verify directly with organizers before making plans. This tool is a guide and not an official endorsement of any specific activity.</p>
+            <p class="text-sm mb-2">&copy; 2025 CAS Explorer. Information adapted from the "CAS Programme Opportunities in Eastern Shizuoka" report.</p>
+            <p class="text-xs text-gray-400"><strong>Important Note:</strong> All activity details are subject to change. Please verify directly with organizers before making plans. This tool is a guide and not an official endorsement of any specific activity.</p>
         </div>
     </footer>
 
 <script>
-function casApp() {
+function casAppLocal() {
     return {
         activeSection: 'home',
         mobileMenuOpen: false,
@@ -228,25 +240,22 @@ function casApp() {
         filteredActivities: [],
         selectedActivity: null,
         filters: {
-            strand: '',
             city: '',
+            strand: '',
             month: ''
         },
         sortBy: 'date',
-        itemsPerPage: 9,
+        itemsPerPage: 12,
         currentPage: 1,
 
         init() {
             this.loadActivities(); 
-            this.applyFilters(); // Apply initial filters to populate the list
-
             this.$nextTick(() => {
+                this.applyFilters();
                 const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            this.activeSection = entry.target.id;
-                        }
+                        if (entry.isIntersecting) { this.activeSection = entry.target.id; }
                     });
                 }, observerOptions);
                 document.querySelectorAll('main section').forEach(section => observer.observe(section));
@@ -255,12 +264,8 @@ function casApp() {
                     const hash = window.location.hash.substring(1);
                     if (hash) this.setActiveSection(hash);
                 });
-                
-                if (window.location.hash) {
-                    this.setActiveSection(window.location.hash.substring(1));
-                } else {
-                    this.setActiveSection('home');
-                }
+                if (window.location.hash) { this.setActiveSection(window.location.hash.substring(1)); } 
+                else { this.setActiveSection('home'); }
             });
         },
 
@@ -271,177 +276,58 @@ function casApp() {
                 const headerOffset = document.querySelector('header').offsetHeight;
                 const elementPosition = element.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 10; 
-                window.scrollTo({
-                     top: offsetPosition,
-                     behavior: "smooth"
-                });
+                window.scrollTo({ top: offsetPosition, behavior: "smooth" });
             }
         },
 
         loadActivities() {
             this.activities = [
-                { 
-                    id: 'c1', 
-                    name: 'Fuji City Citizen Art Festival (Exhibition Entry)', 
-                    city: 'Fuji City', 
-                    description: 'Participate as an artist in the annual Citizen Art Festival (市民芸術祭). Prepare and submit your own original work (painting, calligraphy, photography, craft) for public exhibition. This is a direct creative project with a public outcome.', 
-                    potentialLOs: 'LO1 (strengths in art), LO2 (new skills), LO4 (commitment)', 
-                    strands: ['Creativity'], 
-                    primaryStrand: 'Creativity', 
-                    dates: 'Exhibition usually runs in early to mid-November (e.g., Nov 1-10, 2025).', 
-                    datesShort: 'Early-Mid Nov', 
-                    startDate: '2025-11-01', 
-                    contact: 'Check Fuji City Hall website (文化振興課 - Culture Promotion Division) for official 2025 dates and application guidelines, which are usually released in autumn.', 
-                    cost: 'Free or small entry fee for exhibitors.', 
-                    deadline: 'Application/submission deadline is typically in October. Requires advance planning.' 
-                },
-                { 
-                    id: 'c2', 
-                    name: 'Mishima Chrysanthemum Festival Photography Project', 
-                    city: 'Mishima', 
-                    description: 'The Mishima Chrysanthemum Festival (菊まつり) at Rakujuen Park is a major autumn event. Undertake a creative project to document the festival, focusing on the artistry of the flower displays. Create a themed photo portfolio or a short documentary video.', 
-                    potentialLOs: 'LO1 (developing aesthetic eye), LO2 (photography/videography skills), LO3 (planning project)', 
-                    strands: ['Creativity'], 
-                    primaryStrand: 'Creativity', 
-                    dates: 'Festival typically runs from Nov 1 - Nov 15, 2025.', 
-                    datesShort: 'Nov 1-15', 
-                    startDate: '2025-11-01', 
-                    contact: 'Rakujuen Park (055-975-2570) or Mishima Tourism Association for festival dates. Project is self-initiated.', 
-                    cost: 'Park entry fee (check for student rates).', 
-                    deadline: 'N/A (self-initiated project).' 
-                },
-                { 
-                    id: 'c3', 
-                    name: 'Local "Bunka no Hi" (Culture Day) Workshops', 
-                    city: 'Regional', 
-                    description: 'November 3rd is Culture Day. Many community centers and cultural facilities in Numazu, Mishima, and Fuji City host free or low-cost hands-on workshops (e.g., tea ceremony, pottery, traditional crafts). Participating in one of these workshops is a creative skill-building experience.', 
-                    potentialLOs: 'LO1, LO2 (learning new craft)', 
-                    strands: ['Creativity'], 
-                    primaryStrand: 'Creativity', 
-                    dates: 'Around November 3, 2025 (and nearby weekends).', 
-                    datesShort: 'Early Nov', 
-                    startDate: '2025-11-03', 
-                    contact: 'Check your local city\'s "Koho" (広報) newsletter or website (e.g., "広報ふじ", "広報みしま") in October for a schedule of events.', 
-                    cost: 'Often free or minimal material fee.', 
-                    deadline: 'Some workshops may require pre-registration.' 
-                },
-                { 
-                    id: 'a1', 
-                    name: 'Numazu Imperial Villa (Goyotei) Park Fitness Challenge', 
-                    city: 'Numazu', 
-                    description: 'The extensive park grounds offer a beautiful setting for a personal fitness challenge. Plan a regular jogging, running, or brisk walking routine. Track your progress (distance, time) over November and December to demonstrate commitment and physical development.', 
-                    potentialLOs: 'LO1 (improving fitness), LO4 (commitment)', 
-                    strands: ['Activity'], 
-                    primaryStrand: 'Activity', 
-                    dates: 'Ongoing (Park is open daily, closed 3rd Mon of month).', 
-                    datesShort: 'Nov - Dec', 
-                    startDate: '2025-11-01', 
-                    contact: 'Self-initiated. Park info at 055-931-0005.', 
-                    cost: 'Park entry fee (100 yen).', 
-                    deadline: 'N/A (self-initiated).' 
-                },
-                { 
-                    id: 'a2', 
-                    name: 'Mount Ashitaka Autumn Hiking Expedition', 
-                    city: 'Ashitaka (Regional)', 
-                    description: 'Plan and execute a challenging hike on one of the peaks of Mount Ashitaka (e.g., Echizen-dake, Hakamagoshi). This requires planning (route, safety, weather) and significant physical exertion. Best done in November before potential ice.', 
-                    potentialLOs: 'LO1, LO2 (navigation/safety skills), LO3 (planning), LO4', 
-                    strands: ['Activity'], 
-                    primaryStrand: 'Activity', 
-                    dates: 'November 2025 (Self-planned, check weather).', 
-                    datesShort: 'November', 
-                    startDate: '2025-11-01', 
-                    contact: 'Self-initiated. Use local hiking maps and resources. Inform others of your plans.', 
-                    cost: 'Free (transport to trailhead).', 
-                    deadline: 'N/A (self-initiated).' 
-                },
-                { 
-                    id: 's1', 
-                    name: 'Groundwork Mishima "Mishima Migaki" Cleanup', 
-                    city: 'Mishima', 
-                    description: 'Participate in the regular city-wide cleanup event. This is a direct, hands-on service to the local community and environment, working alongside local citizens.', 
-                    potentialLOs: 'LO4 (commitment if regular), LO5 (collaboration), LO6 (local environment)', 
-                    strands: ['Service'], 
-                    primaryStrand: 'Service', 
-                    dates: 'First Sunday of the month (Nov 2 & Dec 7, 2025). Check schedule.', 
-                    datesShort: 'Nov 2 & Dec 7', 
-                    startDate: '2025-11-02', 
-                    contact: 'Groundwork Mishima (055-983-0136 or gwmishima.jp) to confirm dates and meeting locations.', 
-                    cost: 'Free.', 
-                    deadline: 'Usually no registration needed, just show up.' 
-                },
-                { 
-                    id: 's2', 
-                    name: '"Akai Hane" (Red Feather) Fundraising Volunteer', 
-                    city: 'Regional', 
-                    description: 'The "Akai Hane Kyodo Bokin" (Red Feather Community Chest) is a major nationwide charity drive. Local Social Welfare Councils often need volunteers in Nov/Dec to help with street-side fundraising or sorting donations.', 
-                    potentialLOs: 'LO5, LO6 (local welfare)', 
-                    strands: ['Service'], 
-                    primaryStrand: 'Service', 
-                    dates: 'Primarily November and December 2025.', 
-                    datesShort: 'Nov - Dec', 
-                    startDate: '2025-11-01', 
-                    contact: 'Contact your local Social Welfare Council (Shakai Fukushi Kyougikai) in Fuji, Mishima, or Numazu to inquire about volunteer needs.', 
-                    cost: 'Free.', 
-                    deadline: 'Inquire in advance (early November).' 
-                },
-                { 
-                    id: 's3', 
-                    name: '"Toshi-no-Se Tasukeai" (Year-End Mutual Help) Drive', 
-                    city: 'Regional', 
-                    description: 'In December, many NPOs and Social Welfare Councils run special drives (food, blankets, donations) for homeless or low-income families. Volunteer to help sort donated goods, prepare care packages, or assist with distribution events.', 
-                    potentialLOs: 'LO5, LO6 (local poverty issues), LO7 (ethics)', 
-                    strands: ['Service'], 
-                    primaryStrand: 'Service', 
-                    dates: 'December 2025.', 
-                    datesShort: 'December', 
-                    startDate: '2025-12-01', 
-                    contact: 'Contact your local Social Welfare Council (Numazu, Mishima, Fuji) or NPOs like "Food Bank Fuji no Kuni" to ask about year-end volunteer needs.', 
-                    cost: 'Free.', 
-                    deadline: 'Inquire by late November or early December.' 
-                },
-                { 
-                    id: 'sc1', 
-                    name: 'Numazu Christmas Market Volunteer', 
-                    city: 'Numazu', 
-                    description: 'Volunteer to help with the setup or operation of a local Christmas Market (often held in Numazu Chuo Koen or nearby). This could involve setting up decorations (Creativity), running a children\'s activity booth (Service), or helping with event logistics (Service).', 
-                    potentialLOs: 'LO3 (planning), LO5 (collaboration)', 
-                    strands: ['Service', 'Creativity'], 
-                    primaryStrand: 'Service', 
-                    dates: 'Market is typically mid-December. Volunteer calls would be late Nov / early Dec.', 
-                    datesShort: 'Mid-December', 
-                    startDate: '2025-12-10', 
-                    contact: 'Check the Numazu City or Tourism website, or look for event organizers\' (e.g., local shotengai or chamber of commerce) calls for volunteers starting in November.', 
-                    cost: 'Free.', 
-                    deadline: 'Inquire by late November.' 
-                }
+                { id: 'n1', name: 'Numazu Arts Festival', dates: 'Nov 1 - 3, 2025', datesShort: 'Nov 1-3', startDate: '2025-11-01', location: 'Plaza Verde, etc.', city: 'Numazu', strands: ['Creativity', 'Service'], audience: 'General Public', cost: 'Varies; many exhibitions free', contact: 'Numazu City Hall, Culture Promotion Division (文化振興課)', description: 'A city-wide celebration of arts. **Creativity:** Attend exhibitions/performances as a catalyst for your own art, or plan a project for a future festival. **Service:** Proactively contact organizers to volunteer as an usher, guide, or event staff.' },
+                { id: 'n2', name: 'Aqours Numazu Jimo Ai Festival', dates: 'Nov 1 - 3, 2025', datesShort: 'Nov 1-3', startDate: '2025-11-01', location: 'Plaza Verde / Kiramesse Numazu', city: 'Numazu', strands: ['Service', 'Creativity'], audience: 'General Public', cost: 'Free entry to festival area', contact: 'Numazu Tourism Portal (numazukanko.jp)', description: 'A major festival celebrating the anime *Love Live! Sunshine!!*. **Service:** A unique opportunity to address "anime pilgrimage" tourism. Create and distribute multilingual guides on local etiquette and responsible tourism, or organize a fan-led cleanup. **Creativity:** A photojournalism project documenting the anime\'s socio-economic impact on the city.' },
+                { id: 'f1', name: 'Fuji-Kawaguchiko Autumn Leaves Festival', dates: 'Nov 1 - 30, 2025', datesShort: 'All November', startDate: '2025-11-01', location: 'Momiji Corridor, Lake Kawaguchi', city: 'Greater Fuji Area', strands: ['Creativity', 'Service'], audience: 'General Public', cost: 'Free admission', contact: 'Fujikawaguchiko Tourist Information (fujikawaguchiko.net)', description: 'A month-long festival with food stalls, a craft market, and live music. **Creativity:** A photography series of the illuminated "Momiji Corridor," or learning a craft from a vendor. **Service:** Propose to volunteer for festival organizers (e.g., visitor information, cleanup).' },
+                { id: 'm1', name: 'Mishima Chrysanthemum Festival (Kiku Matsuri)', dates: 'Late Oct - Late Nov, 2025', datesShort: 'All November', startDate: '2025-11-01', location: 'Rakujuen Park', city: 'Mishima', strands: ['Service', 'Creativity'], audience: 'General Public', cost: 'Park admission may apply', contact: 'Rakujuen Park (055-975-2570)', description: 'An annual festival displaying over 6,000 chrysanthemums. **Service:** Propose a project to the park, like creating info pamphlets for visitors or organizing a student-led beautification day. **Creativity:** A photography project focused on the floral art.' },
+                { id: 'm4', name: 'Mishima Volunteer Registration "Hapi-Vola"', dates: 'Ongoing', datesShort: 'Ongoing', startDate: '2025-11-01', location: 'Mishima Social Welfare Council Office', city: 'Mishima', strands: ['Service'], audience: 'Students, General Public', cost: 'Free', contact: 'Mishima Social Welfare Council (055-972-3221)', description: 'A structured system for finding ongoing local volunteer roles. **Service:** This is the *gateway* to sustained service. Register, get matched, and commit to a long-term role (e.g., at an elderly care facility, community center).' },
+                { id: 'f7', name: 'Hall Earth Nature School - Winter Camp Staff', dates: 'Training Nov; Camps in Dec', datesShort: 'Nov (Train), Dec (Camp)', startDate: '2025-11-01', location: 'Fujinomiya', city: 'Fujinomiya', strands: ['Service', 'Activity', 'Creativity'], audience: 'High School Students, University Students', cost: 'Free for volunteers', contact: 'Hall Earth Nature School (hall-earth.jp)', description: 'A long-term commitment. Train as a "Group Leader" for residential nature camps for elementary students. **Service:** Mentoring children. **Activity:** Outdoor activities. **Creativity:** Planning games/crafts.' },
+                { id: 'f2', name: 'Fujinomiya Autumn Festival', dates: 'Nov 3 - 5, 2025', datesShort: 'Nov 3-5', startDate: '2025-11-03', location: 'Fujisan Hongu Sengen Taisha Shrine', city: 'Fujinomiya', strands: ['Creativity', 'Service'], audience: 'General Public', cost: 'Free to attend', contact: 'Fujinomiya City Tourism (fujinomiya.gr.jp)', description: 'The annual autumn festival of the main shrine, featuring floats and traditional music. **Creativity:** A cultural immersion project documenting the festival\'s traditions through video or interviews. **Service:** Propose to help with cleanup or assist shrine staff with crowd management.' },
+                { id: 'n3', name: 'Yosakoi Numazu Autumn Festival', dates: 'Nov 8 - 9, 2025', datesShort: 'Nov 8-9', startDate: '2025-11-08', location: 'Central Park, Kanogawa Park, etc.', city: 'Numazu', strands: ['Service', 'Activity'], audience: 'High School Students & older', cost: 'Free for volunteers', contact: 'Yosakoi Numazu Festival Executive Committee (via City Hall or website)', description: 'A large, vibrant dance festival. **Service:** Organizers actively recruit "Supporters" for roles like reception, guiding dancers, and traffic control (requires parental consent for HS students). **Activity:** Join a Yosakoi dance team, which requires long-term commitment and practice.' },
+                { id: 'f3', name: 'First Rice Flour Forum Fuji', dates: 'Nov 13, 2025', datesShort: 'Nov 13', startDate: '2025-11-13', location: 'Fuji Rose Theatre', city: 'Fuji City', strands: ['Service'], audience: 'General Public', cost: 'Pre-registration required', contact: 'Fuji Rose Theatre (fuji-rose-theatre.jp)', description: 'A forum and networking event focused on rice flour. **Service:** A niche but valuable opportunity for students interested in food science or event management. Volunteer to assist with registration, setup, or distributing materials.' },
+                { id: 'n5', name: 'LaLaport Numazu e-Sports Cup', dates: 'Mid-Nov 2025 (TBD)', datesShort: 'Mid-Nov (TBD)', startDate: '2025-11-15', location: 'LaLaport Numazu', city: 'Numazu', strands: ['Activity', 'Creativity'], audience: 'All ages (check brackets)', cost: 'Free to enter/watch', contact: 'Check LaLaport Numazu official website', description: 'A local e-sports competition. **Activity:** Form a team, train, and compete, demonstrating teamwork and skill development. **Creativity:** Analyze the event\'s organization, branding, and community impact.' },
+                { id: 'm3', name: 'Art Exhibition: Hakuin Ekaku & Egawa Tanan', dates: 'Nov 16 - Dec 21, 2025', datesShort: 'Nov 16 - Dec 21', startDate: '2025-11-16', location: 'Sano Art Museum (Mishima)', city: 'Mishima', strands: ['Creativity'], audience: 'General Public', cost: 'TBD (Check Sano Art Museum website)', contact: 'Sano Art Museum (sanobi.or.jp)', description: 'An art exhibition of historically significant local figures. **Creativity:** Use the exhibition as a foundation for a research project on Zen art or local history, culminating in a presentation, essay, or educational website.' },
+                { id: 'n4', name: 'SAMBOMASTER "Get Back" Tour', dates: 'Nov 17, 2025', datesShort: 'Nov 17', startDate: '2025-11-17', location: 'Numazu Civic Cultural Center', city: 'Numazu', strands: ['Creativity'], audience: 'General Public', cost: '6,600 JPY', contact: 'Numazu Civic Cultural Center (numazu-bunka.jp)', description: 'A live music performance. **Creativity:** This is an appreciation-based event. To count for CAS, this must be extended into a project (e.g, a written analysis of the performance, a video essay on the band\'s cultural impact, learning to play their songs).' },
+                { id: 'f4', name: 'Fuji City International Exchange Volunteer Fair', dates: 'Nov 20, 2025 (Recruitment Event)', datesShort: 'Nov 20 (Recruit)', startDate: '2025-11-20', location: 'Fuji City International Exchange Lounge', city: 'Fuji City', strands: ['Service'], audience: 'High School Students+', cost: 'Free', contact: 'Fuji City International Exchange Lounge (f-i-a.jp)', description: 'A recruitment and orientation event for volunteers. **Service:** Attend this session to register for ongoing roles like language exchange partner, cultural event assistant, or translation help for city materials.' },
+                { id: 'n6', name: 'Numazu City Forest Laurels Talk Show', dates: 'Nov 23, 2025', datesShort: 'Nov 23', startDate: '2025-11-23', location: 'Numazu City Cultural Center', city: 'Numazu', strands: ['Creativity'], audience: 'General Public', cost: 'Free (registration required)', contact: 'Numazu City Hall, Lifelong Learning Division', description: 'A talk show with local personalities. **Creativity:** An appreciation event. To count for CAS, this must be extended, e.g., writing an article about the speakers, or starting a student-led podcast inspired by the format.' },
+                { id: 'm2', name: 'Mishima Food Festival', dates: 'Late Nov, 2025', datesShort: 'Late Nov', startDate: '2025-11-23', location: 'Rakujuen Park and other city locales', city: 'Mishima', strands: ['Service', 'Creativity'], audience: 'General Public', cost: 'Free to attend', contact: 'Mishima Chamber of Commerce or City Hall', description: 'A culinary event showcasing local foods. **Service:** Propose a project to organizers, like managing a "Zero Waste" station or conducting attendee surveys for future planning. **Creativity:** Document local food culture through video or a blog.' },
+                { id: 'f5', name: 'Mt. Fuji International Marathon', dates: 'Dec 14, 2025', datesShort: 'Dec 14', startDate: '2025-12-14', location: 'Starts/Finishes near Lake Kawaguchi', city: 'Greater Fuji Area', strands: ['Activity', 'Service'], audience: 'General Public', cost: 'Entry fee for runners; free for volunteers', contact: 'Official Website (mtfujimarathon.com)', description: 'A major international marathon. **Activity:** Train for and run the marathon, requiring long-term commitment. **Service:** A volunteer team is essential for this event. Monitor the official website for the call for volunteers (likely in late spring/early summer).' },
+                { id: 'f6', name: 'Fuji Mountain Women\'s Ekiden Volunteer', dates: 'Dec 30, 2025', datesShort: 'Dec 30', startDate: '2025-12-30', location: 'Fuji City Ekiden course route', city: 'Fuji City', strands: ['Service'], audience: 'Fuji City residents, HS students+', cost: 'Free for volunteers', contact: 'Fuji City Hall, Sports Promotion Division (Application in July)', description: 'A premier, structured **Service** opportunity. The city recruits a large team of volunteers for course safety at this nationally televised race. Requires responsibility and punctuality. **Crucially, the application period is July 1 - July 31, 2025.**' }
             ];
+            this.activities = this.activities.map((activity, index) => ({...activity, id: activity.id || `act-${index}` }));
         },
 
         applyFilters() {
             this.currentPage = 1;
             let tempActivities = this.activities;
 
-            if (this.filters.strand) {
-                tempActivities = tempActivities.filter(act => act.strands.includes(this.filters.strand));
-            }
-
             if (this.filters.city) {
-                tempActivities = tempActivities.filter(act => act.city.includes(this.filters.city));
+                tempActivities = tempActivities.filter(act => act.city === this.filters.city);
             }
-
+            if (this.filters.strand) {
+                if (this.filters.strand === 'Cross-Strand') {
+                    tempActivities = tempActivities.filter(act => act.strands.length > 1);
+                } else {
+                    tempActivities = tempActivities.filter(act => act.strands.includes(this.filters.strand));
+                }
+            }
             if (this.filters.month) {
-                const monthNumber = this.filters.month === 'November' ? 11 : 12;
-                tempActivities = tempActivities.filter(act => {
-                    const actDate = new Date(act.startDate);
-                    if (act.dates.toLowerCase().includes('nov') && this.filters.month === 'November') return true;
-                    if (act.dates.toLowerCase().includes('dec') && this.filters.month === 'December') return true;
-                    return actDate.getUTCMonth() + 1 === monthNumber;
-                });
+                const monthLower = this.filters.month.toLowerCase();
+                if (this.filters.month === 'Ongoing') {
+                    tempActivities = tempActivities.filter(act => act.dates.toLowerCase().includes('ongoing'));
+                } else {
+                    tempActivities = tempActivities.filter(act => act.dates.toLowerCase().includes(monthLower) && !act.dates.toLowerCase().includes('ongoing'));
+                }
             }
             
             this.filteredActivities = tempActivities;
-            this.sortActivities(); 
+            this.sortActivities();
         },
         
         sortActivities() {
@@ -471,43 +357,35 @@ function casApp() {
             const maxPagesToShow = 5;
             let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
             let endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
-            
             if (endPage - startPage + 1 < maxPagesToShow) {
                  startPage = Math.max(1, endPage - maxPagesToShow + 1);
             }
-
-            for (let i = startPage; i <= endPage; i++) {
-                numbers.push(i);
+            
+            if (this.totalPages > 0) {
+                 for (let i = startPage; i <= endPage; i++) {
+                    numbers.push(i);
+                }
             }
             return numbers;
         },
 
-        nextPage() {
-            if (this.currentPage < this.totalPages) this.currentPage++;
-        },
-
-        prevPage() {
-            if (this.currentPage > 1) this.currentPage--;
-        },
-        
-        goToPage(pageNumber) {
-            this.currentPage = pageNumber;
-        },
-
-        openModal(activity) {
-            this.selectedActivity = activity;
-        },
-
-        closeModal() {
-            this.selectedActivity = null;
-        },
+        nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
+        prevPage() { if (this.currentPage > 1) this.currentPage--; },
+        goToPage(pageNumber) { this.currentPage = pageNumber; },
+        openModal(activity) { this.selectedActivity = activity; },
+        closeModal() { this.selectedActivity = null; },
 
         formatContact(contactInfo) {
             if (!contactInfo) return 'N/A';
-            const urlRegex = /(https?:\/\/[^\s\[]+|gwmishima\.jp)/g;
+            const urlRegex = /(https?:\/\/[^\s"<>]+|[a-zA-Z0-9.-]+\.(jp|com|net|org|jp\/))/g;
             const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
             
-            let formatted = contactInfo.replace(urlRegex, '<a href="https://$1" target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:underline break-all">$1</a>');
+            let formatted = contactInfo.replace(urlRegex, (match) => {
+                if (match.startsWith('http')) {
+                    return `<a href="${match}" target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:underline break-all">${match}</a>`;
+                }
+                return `<a href="https://${match}" target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:underline break-all">${match}</a>`;
+            });
             formatted = formatted.replace(emailRegex, '<a href="mailto:$1" class="text-teal-600 hover:underline break-all">$1</a>');
             return formatted;
         }
@@ -516,4 +394,4 @@ function casApp() {
 </script>
 </body>
 </html>
-
+```eof
