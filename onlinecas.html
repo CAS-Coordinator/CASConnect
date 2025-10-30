@@ -1,85 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online CAS Explorer (Japan Nov-Dec 2025)</title>
+    <title>Online CAS Explorer (Japan, Nov-Dec 2025)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <!-- Chosen Palette: Warm Neutrals with Soft Blue Accents -->
-    <!-- Application Structure Plan: A clean, single-page application. It starts with an introduction (from the report's foreword). The core is the 'Find Activities' section, an interactive tool with filters (Strand, Focus, Cost, Month) and sorting, displaying results as cards with a modal for details. This structure is task-oriented, prioritizing the student's need to find information quickly. -->
-    <!-- Visualization & Content Choices: Report Data (Activity List) -> Goal: Exploration & Filtering -> Presentation: Interactive card list (HTML/Tailwind/Alpine.js). Report Data (Activity Details) -> Goal: In-depth Info -> Presentation: Modal popup (JS toggle). No charts are included to maintain focus and avoid potential rendering errors. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .nav-link { transition: color 0.3s ease, border-bottom-color 0.3s ease; }
-        .nav-link.active { border-bottom-color: #3B82F6; color: #3B82F6; }
-        .modal { display: none; }
-        .modal.active { display: flex; }
-        .tag { display: inline-block; padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 9999px; margin-right: 0.5rem; margin-bottom: 0.5rem; }
-        .tag-creativity { background-color: #ECFCCB; color: #4D7C0F; border: 1px solid #A3E635; }
-        .tag-activity { background-color: #CFFAFE; color: #0E7490; border: 1px solid #67E8F9; }
-        .tag-service { background-color: #FFE4E6; color: #BE123C; border: 1px solid #FDA4AF; }
-        .modal-content::-webkit-scrollbar { width: 8px; }
-        .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .modal-content::-webkit-scrollbar-thumb { background: #3B82F6; border-radius: 10px; }
-        .modal-content::-webkit-scrollbar-thumb:hover { background: #2563EB; }
-        [x-cloak] { display: none !important; }
+      .nav-link { transition: color 0.3s ease, border-bottom-color 0.3s ease; }
+      .nav-link.active { border-bottom-color: #EA580C; color: #EA580C; } /* Orange */
+      .modal { display: none; }
+      .modal.active { display: flex; }
+      .tag { display: inline-block; padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 9999px; margin-right: 0.5rem; margin-bottom: 0.5rem; font-weight: 500; }
+      .tag-creativity { background-color: #FEF3C7; color: #92400E; border: 1px solid #FBBF24; }
+      .tag-activity { background-color: #E0E7FF; color: #3730A3; border: 1px solid #A5B4FC; }
+      .tag-service { background-color: #D1FAE5; color: #065F46; border: 1px solid #6EE7B7; }
+      .modal-content::-webkit-scrollbar { width: 8px; }
+      .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+      .modal-content::-webkit-scrollbar-thumb { background: #EA580C; border-radius: 10px; }
+      .modal-content::-webkit-scrollbar-thumb:hover { background: #C2410C; }
+        [x-cloak] { display: none!important; }
+      .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+      .accordion-content.open { max-height: 1000px; transition: max-height 0.5s ease-in; }
     </style>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-stone-100 text-gray-800" x-data="casApp()">
+<body class="bg-stone-100 text-gray-800" x-data="casAppOnlineNovDec()">
     <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex-shrink-0">
-                    <h1 class="text-xl font-bold text-blue-600">Online CAS Explorer</h1>
-                    <span class="text-sm text-gray-500">Nov-Dec 2025</span>
+                    <h1 class="text-xl font-bold text-orange-700">Online CAS Explorer (Nov-Dec)</h1>
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#home" @click="setActiveSection('home')" :class="{ 'active': activeSection === 'home' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600">Home</a>
-                        <a href="#find-activities" @click="setActiveSection('find-activities')" :class="{ 'active': activeSection === 'find-activities' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600">Find Activities</a>
+                        <a href="#home" @click="setActiveSection('home')" :class="{ 'active': activeSection === 'home' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-orange-600 border-b-2 border-transparent hover:border-orange-600">Home</a>
+                        <a href="#find-activities" @click="setActiveSection('find-activities')" :class="{ 'active': activeSection === 'find-activities' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-orange-600 border-b-2 border-transparent hover:border-orange-600">Find Activities</a>
+                        <a href="#insights" @click="setActiveSection('insights')" :class="{ 'active': activeSection === 'insights' }" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-orange-600 border-b-2 border-transparent hover:border-orange-600">Strategic Insights</a>
                     </div>
                 </div>
                 <div class="md:hidden">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-controls="mobile-menu" aria-expanded="false">
+                    <button @click="mobileMenuOpen =!mobileMenuOpen" type="button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-orange-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500" aria-controls="mobile-menu" aria-expanded="false">
                         <span class="sr-only">Open main menu</span>
-                        <svg class="block h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg class="h-6 w-6" x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <svg class="block h-6 w-6" x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        <svg class="h-6 w-6" x-show="mobileMenuOpen" x-cloak xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
             </div>
         </nav>
         <div x-show="mobileMenuOpen" x-cloak class="md:hidden" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#home" @click="setActiveSection('home'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Home</a>
-                <a href="#find-activities" @click="setActiveSection('find-activities'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Find Activities</a>
+                <a href="#home" @click="setActiveSection('home'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-gray-50">Home</a>
+                <a href="#find-activities" @click="setActiveSection('find-activities'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-gray-50">Find Activities</a>
+                <a href="#insights" @click="setActiveSection('insights'); mobileMenuOpen = false;" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-gray-50">Strategic Insights</a>
             </div>
         </div>
     </header>
 
     <main class="container mx-auto p-4 sm:p-6 lg:p-8">
         <section id="home" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 class="text-3xl font-bold text-blue-600 mb-4">Welcome to the Online CAS Explorer!</h2>
-            <p class="text-lg text-gray-700 mb-3">This tool is designed to help high school students in Japan find online CAS opportunities for <strong class="text-blue-500">November and December 2025</strong>.</p>
-            <p class="text-gray-600">Online activities offer incredible flexibility and access to global projects. This explorer provides a starting point for your CAS journey, focusing on activities you can participate in from anywhere. Remember to verify details and discuss your plans with your CAS Coordinator.</p>
+            <h2 class="text-3xl font-bold text-orange-700 mb-4">The CAS Online Navigator (Nov-Dec 2025)</h2>
+            <p class="text-lg text-gray-700 mb-3">This tool provides a curated set of online CAS opportunities for IB students in Japan, focusing on <strong class="text-orange-600">November and December 2025</strong>. Online CAS expands the definition of community, allowing you to engage with global issues, contribute to international research, and develop digital skills from home.</p>
+            <p class="text-gray-600">The opportunities here have been selected for their alignment with CAS learning outcomes, potential for meaningful reflection, and accessibility from Japan. Use this explorer to find activities that match your passions and build a compelling, evidence-based CAS program.</p>
         </section>
 
         <section id="find-activities" class="py-8 md:py-12 bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Find Online Activities (Nov-Dec 2025)</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Find Online CAS Activities</h2>
             
-            <div class="mb-8 p-4 border border-blue-200 rounded-lg bg-blue-50">
-                <p class="text-sm text-blue-700">Use the filters below to find activities. Click on an activity card for more details. All information is based on public data and should be verified with organizers.</p>
+            <div class="mb-8 p-4 border border-orange-200 rounded-lg bg-orange-50">
+                <p class="text-sm text-orange-700">Use the filters to discover online CAS activities. Click on a card for more details and for tailored reflection prompts to help with your CAS portfolio.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 items-end">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 items-end">
                 <div>
-                    <label for="filter-strand" class="block text-sm font-medium text-gray-700 mb-1">CAS Strand</label>
-                    <select id="filter-strand" x-model="filters.strand" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <label for="filter-strand-online" class="block text-sm font-medium text-gray-700 mb-1">CAS Strand</label>
+                    <select id="filter-strand-online" x-model="filters.strand" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
                         <option value="">All Strands</option>
                         <option value="Creativity">Creativity</option>
                         <option value="Activity">Activity</option>
@@ -87,34 +82,42 @@
                     </select>
                 </div>
                 <div>
-                    <label for="filter-focus" class="block text-sm font-medium text-gray-700 mb-1">Location Focus</label>
-                    <select id="filter-focus" x-model="filters.focus" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <label for="filter-location-focus-online" class="block text-sm font-medium text-gray-700 mb-1">Location Focus</label>
+                    <select id="filter-location-focus-online" x-model="filters.locationFocus" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
                         <option value="">All Focus</option>
                         <option value="Japan Focus">Japan Focus</option>
                         <option value="Global">Global</option>
                     </select>
                 </div>
                 <div>
-                    <label for="filter-cost" class="block text-sm font-medium text-gray-700 mb-1">Cost</label>
-                    <select id="filter-cost" x-model="filters.cost" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <label for="filter-cost-online" class="block text-sm font-medium text-gray-700 mb-1">Cost</label>
+                    <select id="filter-cost-online" x-model="filters.cost" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
                         <option value="">All Costs</option>
                         <option value="Free">Free</option>
                         <option value="Paid">Paid</option>
                     </select>
                 </div>
-                <div>
-                    <label for="filter-month" class="block text-sm font-medium text-gray-700 mb-1">Month</label>
-                    <select id="filter-month" x-model="filters.month" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">All Months</option>
+                 <div>
+                    <label for="filter-month-online" class="block text-sm font-medium text-gray-700 mb-1">Month Availability</label>
+                    <select id="filter-month-online" x-model="filters.month" @change="applyFilters" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
+                        <option value="">Any Month</option>
                         <option value="November">November</option>
                         <option value="December">December</option>
                         <option value="Ongoing">Ongoing</option>
                     </select>
                 </div>
             </div>
+             <div class="mb-6">
+                <label for="sort-by-online" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                <select id="sort-by-online" x-model="sortBy" @change="sortActivities" class="w-full md:w-1/4 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
+                    <option value="deadline">Submission Deadline</option>
+                    <option value="name">Activity Name (A-Z)</option>
+                    <option value="strand">CAS Strand</option>
+                </select>
+            </div>
             
             <div x-show="filteredActivities.length === 0" class="text-center py-10 text-gray-500">
-                <p class="text-xl">No activities match your current filters.</p>
+                <p class="text-xl">No online activities match your current filters.</p>
                 <p>Try adjusting your search criteria.</p>
             </div>
 
@@ -122,9 +125,9 @@
                 <template x-for="activity in pagedActivities" :key="activity.id">
                     <div @click="openModal(activity)" class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden flex flex-col">
                         <div class="p-5 flex-grow">
-                            <h3 class="text-lg font-semibold text-blue-600 mb-2" x-text="activity.name"></h3>
-                            <p class="text-sm text-gray-600 mb-1"><strong class="font-medium">🌍 Focus:</strong> <span x-text="activity.focus"></span></p>
-                            <p class="text-sm text-gray-600 mb-3"><strong class="font-medium">📅 Dates:</strong> <span x-text="activity.datesShort"></span></p>
+                            <h3 class="text-lg font-semibold text-orange-700 mb-2" x-text="activity.name"></h3>
+                            <p class="text-sm text-gray-600 mb-1"><strong class="font-medium">🏢 Org:</strong> <span x-text="activity.organization"></span></p>
+                            <p class="text-sm text-gray-600 mb-3"><strong class="font-medium">📅 Deadline:</strong> <span x-text="activity.deadline"></span></p>
                             <div class="mb-2">
                                 <template x-for="strand in activity.strands" :key="strand">
                                     <span :class="{
@@ -136,7 +139,7 @@
                             </div>
                         </div>
                         <div class="bg-gray-50 p-3 text-right">
-                            <span class="text-sm text-blue-600 font-medium">View Details &rarr;</span>
+                            <span class="text-sm text-orange-600 font-medium">View Details &rarr;</span>
                         </div>
                     </div>
                 </template>
@@ -145,22 +148,22 @@
             <div x-show="totalPages > 1" class="mt-8 flex justify-center items-center space-x-2">
                 <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">&laquo; Prev</button>
                 <template x-for="page in pageNumbers" :key="page">
-                    <button @click="goToPage(page)" :class="{'bg-blue-600 text-white': currentPage === page, 'bg-gray-200 text-gray-700 hover:bg-gray-300': currentPage !== page}" class="px-4 py-2 rounded-md" x-text="page"></button>
+                    <button @click="goToPage(page)" :class="{'bg-orange-600 text-white': currentPage === page, 'bg-gray-200 text-gray-700 hover:bg-gray-300': currentPage!== page}" class="px-4 py-2 rounded-md" x-text="page"></button>
                 </template>
                 <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">Next &raquo;</button>
             </div>
         </section>
 
-        <div x-show="selectedActivity" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 z-50" :class="{'active': selectedActivity !== null}" @click.self="closeModal" x-cloak>
+        <div x-show="selectedActivity" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 z-50" :class="{'active': selectedActivity!== null}" @click.self="closeModal" x-cloak>
             <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div class="flex justify-between items-center p-4 border-b border-gray-200">
-                    <h3 class="text-xl font-semibold text-blue-600" x-text="selectedActivity?.name"></h3>
-                    <button @click="closeModal" class="text-gray-500 hover:text-gray-700">&times;</button>
+                    <h3 class="text-xl font-semibold text-orange-700" x-text="selectedActivity?.name"></h3>
+                    <button @click="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
                 </div>
-                <div class="p-6 overflow-y-auto modal-content flex-grow">
-                    <p class="mb-3 text-gray-700"><strong class="font-semibold text-gray-800">Description:</strong> <span x-html="selectedActivity?.description"></span></p>
-                    <p class="mb-2"><strong class="font-semibold text-gray-800">🌍 Location Focus:</strong> <span x-text="selectedActivity?.focus" class="text-gray-700"></span></p>
-                    <p class="mb-2"><strong class="font-semibold text-gray-800">📅 Dates:</strong> <span x-text="selectedActivity?.dates" class="text-gray-700"></span></p>
+                <div class="p-6 overflow-y-auto modal-content flex-grow text-sm">
+                    <p class="mb-3"><strong class="font-semibold text-gray-800">Organization:</strong> <span x-text="selectedActivity?.organization" class="text-gray-700"></span></p>
+                    <p class="mb-3"><strong class="font-semibold text-gray-800">Description & Tasks:</strong> <span x-html="selectedActivity?.description" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">📅 Relevant Dates:</strong> <span x-text="selectedActivity?.dates" class="text-gray-700"></span></p>
                     <div class="mb-3">
                         <strong class="font-semibold text-gray-800">CAS Strand(s):</strong>
                         <div>
@@ -173,54 +176,72 @@
                             </template>
                         </div>
                     </div>
-                    <p class="mb-2" x-show="selectedActivity?.potentialLOs"><strong class="font-semibold text-gray-800">Potential Learning Outcomes:</strong> <span x-text="selectedActivity?.potentialLOs" class="text-gray-700"></span></p>
-                    <p class="mb-2"><strong class="font-semibold text-gray-800">🔗 URL/Contact:</strong> <span x-html="formatContact(selectedActivity?.contact)" class="text-gray-700"></span></p>
-                    <p class="mb-2"><strong class="font-semibold text-gray-800">💰 Cost:</strong> <span x-text="selectedActivity?.cost" class="text-gray-700"></span></p>
-                    <p class="mb-2"><strong class="font-semibold text-gray-800">⏳ Deadline:</strong> <span x-text="selectedActivity?.deadline" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">💰 Estimated Cost:</strong> <span x-text="selectedActivity?.cost" class="text-gray-700"></span></p>
+                    <p class="mb-2"><strong class="font-semibold text-gray-800">🔗 Application/URL & Deadline:</strong> <span x-html="formatContact(selectedActivity?.urlDeadline)" class="text-gray-700 break-all"></span></p>
+                    <div class="mt-4 pt-3 border-t">
+                        <h4 class="font-semibold text-gray-800 mb-2">Expert Insight: CAS Reflection Prompts</h4>
+                        <div class="text-gray-600 text-xs space-y-2" x-html="selectedActivity?.reflectionPrompts"></div>
+                    </div>
                 </div>
                 <div class="p-4 border-t border-gray-200 text-right">
-                    <button @click="closeModal" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Close</button>
+                    <button @click="closeModal" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700">Close</button>
                 </div>
             </div>
         </div>
+
+        <section id="insights" class="py-8 md:py-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Strategic Insights for Online CAS</h2>
+            <div class="space-y-4 max-w-3xl mx-auto">
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open =!open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-orange-700">The Rise of "Service as Learning"</h3>
+                        <svg :class="{'rotate-180': open, '':!open}" class="w-5 h-5 text-orange-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" class="accordion-content mt-2 text-gray-600 text-sm" :class="{'open': open}">
+                        <p>Notice the trend of structured, sometimes fee-based, online service programs like those from NPO LOOB JAPAN. These are curated educational courses with a service component. The fee is an investment in a high-quality, verifiable experience that delivers clear learning outcomes, especially "engagement with issues of global significance." This reframes the cost as a strategic choice for a well-supported and impactful CAS project.</p>
+                    </div>
+                </div>
+                <div x-data="{ open: false }" class="bg-white p-4 rounded-lg shadow">
+                    <button @click="open =!open" class="flex justify-between items-center w-full text-left">
+                        <h3 class="text-lg font-semibold text-orange-700">Using Nov/Dec as a Launchpad for Long-Term Projects</h3>
+                        <svg :class="{'rotate-180': open, '':!open}" class="w-5 h-5 text-orange-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" class="accordion-content mt-2 text-gray-600 text-sm" :class="{'open': open}">
+                        <p>The IB values "commitment and perseverance." Many high-impact programs like Ashinaga Ikueikai or the After-School Programming Club require a multi-month commitment. A strategic approach is to use November or December to start such a program. This transforms this timeframe from a boundary into a starting point for a major, portfolio-defining CAS project that powerfully demonstrates one of the most valued learning outcomes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer class="bg-gray-800 text-white py-8 text-center">
         <div class="container mx-auto px-4">
-            <p class="text-sm mb-2">&copy; 2025 Online CAS Explorer. Information based on public data for Nov/Dec 2025.</p>
-            <p class="text-xs text-gray-400"><strong>Important Note:</strong> All activity details (dates, costs, availability) are subject to change. Please verify directly with organizers before making plans. This tool is a guide and not an official endorsement of any specific activity.</p>
+            <p class="text-sm mb-2">&copy; 2025 Online CAS Explorer. Information from "The CAS Online Navigator" report.</p>
+            <p class="text-xs text-gray-400"><strong>Disclaimer:</strong> All activity details are subject to change. Please verify all information directly with organizers before making plans.</p>
         </div>
     </footer>
 
 <script>
-function casApp() {
+function casAppOnlineNovDec() {
     return {
         activeSection: 'home',
         mobileMenuOpen: false,
         activities: [],
         filteredActivities: [],
         selectedActivity: null,
-        filters: {
-            strand: '',
-            focus: '',
-            cost: '',
-            month: ''
-        },
-        sortBy: 'name',
-        itemsPerPage: 9,
+        filters: { strand: '', locationFocus: '', cost: '', month: '' },
+        sortBy: 'deadline',
+        itemsPerPage: 12,
         currentPage: 1,
 
         init() {
             this.loadActivities(); 
-            this.applyFilters(); // Apply initial filters to populate the list
-
             this.$nextTick(() => {
+                this.applyFilters();
                 const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            this.activeSection = entry.target.id;
-                        }
+                        if (entry.isIntersecting) { this.activeSection = entry.target.id; }
                     });
                 }, observerOptions);
                 document.querySelectorAll('main section').forEach(section => observer.observe(section));
@@ -229,12 +250,8 @@ function casApp() {
                     const hash = window.location.hash.substring(1);
                     if (hash) this.setActiveSection(hash);
                 });
-                
-                if (window.location.hash) {
-                    this.setActiveSection(window.location.hash.substring(1));
-                } else {
-                    this.setActiveSection('home');
-                }
+                if (window.location.hash) { this.setActiveSection(window.location.hash.substring(1)); } 
+                else { this.setActiveSection('home'); }
             });
         },
 
@@ -245,155 +262,31 @@ function casApp() {
                 const headerOffset = document.querySelector('header').offsetHeight;
                 const elementPosition = element.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 10; 
-                window.scrollTo({
-                     top: offsetPosition,
-                     behavior: "smooth"
-                });
+                window.scrollTo({ top: offsetPosition, behavior: "smooth" });
             }
         },
 
         loadActivities() {
             this.activities = [
-                { 
-                    id: 'c1', 
-                    name: 'National Novel Writing Month (NaNoWriMo)', 
-                    description: 'Join the global challenge to write a novel (or a self-set word count goal via the Young Writers Program) in 30 days. This is an excellent, structured creative project requiring significant commitment.', 
-                    potentialLOs: 'LO1 (strengths/growth), LO2 (new skills), LO4 (commitment)', 
-                    strands: ['Creativity'], 
-                    primaryStrand: 'Creativity', 
-                    focus: 'Global', 
-                    cost: 'Free', 
-                    dates: 'November 1 - November 30, 2025', 
-                    datesShort: 'November', 
-                    contact: 'nanowrimo.org (Main site) / ywp.nanowrimo.org (Young Writers Program)', 
-                    deadline: 'Sign-ups open, event starts Nov 1.' 
-                },
-                { 
-                    id: 's1', 
-                    name: 'Amnesty International Japan: "Write for Rights" (ライティングマラソン)', 
-                    description: 'Participate in Japan\'s "Writing Marathon," part of the global Write for Rights campaign. Research cases of individuals whose human rights are at risk and write letters to authorities demanding justice and to the individuals to show solidarity.', 
-                    potentialLOs: 'LO5 (collaboration), LO6 (global issues), LO7 (ethics)', 
-                    strands: ['Service', 'Creativity'], 
-                    primaryStrand: 'Service', 
-                    focus: 'Japan Focus', 
-                    cost: 'Free', 
-                    dates: 'Campaign runs Nov - Dec, peaking around December 10 (Human Rights Day).', 
-                    datesShort: 'Nov - Dec', 
-                    contact: 'amnesty.or.jp (Search for "ライティングマラソン" or "Write for Rights" starting in November)', 
-                    deadline: 'Letter-writing is ongoing during the campaign (Nov-Dec).' 
-                },
-                { 
-                    id: 's2', 
-                    name: 'Zooniverse - Citizen Science Projects', 
-                    description: 'Participate in people-powered research. Classify galaxies from telescope images, transcribe historical Japanese manuscripts, or identify animals from camera traps in remote ecosystems. Dozens of projects available.', 
-                    potentialLOs: 'LO1, LO4, LO6 (scientific/global issues)', 
-                    strands: ['Service'], 
-                    primaryStrand: 'Service', 
-                    focus: 'Global', 
-                    cost: 'Free', 
-                    dates: 'Ongoing', 
-                    datesShort: 'Ongoing', 
-                    contact: 'zooniverse.org', 
-                    deadline: 'N/A (Ongoing)' 
-                },
-                { 
-                    id: 'c2', 
-                    name: 'LibriVox - Public Domain Audiobook Volunteer', 
-                    description: 'Volunteer to read and record chapters of public domain books to create free audiobooks. This requires creativity in voice acting and technical skill in recording/editing audio. Can also volunteer as an editor or proof-listener.', 
-                    potentialLOs: 'LO2 (new skills), LO4 (commitment), LO5 (collaboration)', 
-                    strands: ['Creativity', 'Service'], 
-                    primaryStrand: 'Creativity', 
-                    focus: 'Global', 
-                    cost: 'Free', 
-                    dates: 'Ongoing', 
-                    datesShort: 'Ongoing', 
-                    contact: 'librivox.org', 
-                    deadline: 'N/A (Ongoing)' 
-                },
-                { 
-                    id: 'a1', 
-                    name: 'Stage:0 - Japan High School Esports Tournament', 
-                    description: 'Form a team and participate in one of Japan\'s largest online high school esports tournaments. Requires teamwork, strategic planning (Creativity), and sustained practice (Activity). Check for winter season qualifiers.', 
-                    potentialLOs: 'LO1 (strengths), LO2 (new skills), LO4, LO5 (collaboration)', 
-                    strands: ['Activity', 'Creativity'], 
-                    primaryStrand: 'Activity', 
-                    focus: 'Japan Focus', 
-                    cost: 'Free', 
-                    dates: 'Registration/Qualifying rounds for winter events may occur in Nov/Dec.', 
-                    datesShort: 'Nov - Dec (Check Schedule)', 
-                    contact: 'stage0.jp (Check for 2025-2026 Winter season announcements)', 
-                    deadline: 'Varies by game and season.' 
-                },
-                { 
-                    id: 's3', 
-                    name: 'Be My Eyes - Volunteer for the Blind', 
-                    description: 'Be a pair of eyes for a blind or low-vision person through a live video call via a smartphone app. Assist with simple, real-time tasks like reading labels, checking dates, or describing surroundings.', 
-                    potentialLOs: 'LO1, LO6, LO7 (ethics of interaction)', 
-                    strands: ['Service'], 
-                    primaryStrand: 'Service', 
-                    focus: 'Global', 
-                    cost: 'Free', 
-                    dates: 'Ongoing (Calls are random, based on need)', 
-                    datesShort: 'Ongoing', 
-                    contact: 'bemyeyes.com (Requires smartphone app)', 
-                    deadline: 'N/A (Ongoing)' 
-                },
-                { 
-                    id: 'c3', 
-                    name: 'AtCoder Regular/Grand Contests', 
-                    description: 'Participate in world-class competitive programming contests hosted online from Japan. Solve complex algorithmic challenges within a time limit. A strong creative challenge for students with coding skills.', 
-                    potentialLOs: 'LO1, LO2 (problem-solving skills), LO4', 
-                    strands: ['Creativity'], 
-                    primaryStrand: 'Creativity', 
-                    focus: 'Japan Focus', 
-                    cost: 'Free', 
-                    dates: 'Regular contests on weekends (Check schedule for Nov/Dec 2025)', 
-                    datesShort: 'Nov - Dec (Weekends)', 
-                    contact: 'atcoder.jp', 
-                    deadline: 'Register online before each contest.' 
-                },
-                { 
-                    id: 'a2', 
-                    name: '"Go Healthy!" Virtual Fitness Challenge (Japan)', 
-                    description: 'Join an online virtual fitness challenge. Log your physical activity (running, walking, cycling, home workouts) to contribute to a collective goal. Requires sustained personal physical exertion.', 
-                    potentialLOs: 'LO1 (physical health), LO2 (new habits), LO4 (commitment)', 
-                    strands: ['Activity'], 
-                    primaryStrand: 'Activity', 
-                    focus: 'Japan Focus', 
-                    cost: 'Free', 
-                    dates: 'November 1 - December 15, 2025 (Plausible dates)', 
-                    datesShort: 'Nov 1 - Dec 15', 
-                    contact: 'Search for "virtual marathon Japan" or "online fitness challenge Japan" in late 2025.', 
-                    deadline: 'Registration likely by early November.' 
-                },
-                { 
-                    id: 'c4', 
-                    name: 'International Digital Art Competition (Plausible)', 
-                    description: 'Enter an online art competition for high school students. Create an original digital painting, 3D model, or animation based on a set theme (e.g., "Connection"). Requires developing a creative idea and executing it technically.', 
-                    potentialLOs: 'LO1, LO2 (digital tools), LO3 (planning)', 
-                    strands: ['Creativity'], 
-                    primaryStrand: 'Creativity', 
-                    focus: 'Global', 
-                    cost: 'Free', 
-                    dates: 'Submission Deadline: December 1, 2025 (Plausible)', 
-                    datesShort: 'Deadline: Dec 1', 
-                    contact: 'Search for "high school digital art contest" or "student animation festival" on platforms like ArtStation or university websites.', 
-                    deadline: 'December 1, 2025' 
-                },
-                { 
-                    id: 's4', 
-                    name: 'Translators Without Borders (TWB) Kató', 
-                    description: 'For highly fluent bilingual students (e.g., Japanese/English). Volunteer to translate short texts for NGOs and humanitarian organizations. (Note: May require being 18+, but students can check eligibility for specific projects).', 
-                    potentialLOs: 'LO2 (translation skills), LO5, LO6 (global aid), LO7', 
-                    strands: ['Service'], 
-                    primaryStrand: 'Service', 
-                    focus: 'Global', 
-                    cost: 'Free', 
-                    dates: 'Ongoing', 
-                    datesShort: 'Ongoing', 
-                    contact: 'translatorswithoutborders.org/kato-platform/', 
-                    deadline: 'N/A (Ongoing)' 
-                }
+                // SERVICE
+                { id: 'os1', name: 'NPO LOOB JAPAN - Online SDGs Program', organization: 'NPO LOOB JAPAN', dates: 'Program: Nov 25 - Dec 23', deadline: 'Nov 18, 2025', deadlineSort: '2025-11-18', locationFocus: 'Japan Focus', cost: 'Paid', strands: ['Service', 'Creativity'], primaryStrandSort: 'Service', description: 'Learn about SDGs and interact with Filipino youth in English via a structured online program. A certificate is issued upon completion.', urlDeadline: 'Visit activo.jp and search for NPO LOOB JAPAN.', reflectionPrompts: 'How did interacting with youth from another country change your perspective on a specific SDG? What were the challenges of cross-cultural communication online, and how did you overcome them?' },
+                { id: 'os2', name: 'After-School Programming Club Mentor', organization: 'Kids Code Club', dates: 'Long-term: Nov 7, 2025 - Mar 31, 2026', deadline: 'Check site', deadlineSort: '2025-11-07', locationFocus: 'Japan Focus', cost: 'Free', strands: ['Service', 'Creativity'], primaryStrandSort: 'Service', description: 'Serve as a mentor for younger children learning to code in a long-term, remote program.', urlDeadline: 'Visit activo.jp and search for Kids Code Club.', reflectionPrompts: 'How did you adapt your communication style to teach complex topics to younger students online? What ethical considerations did you face when mentoring children?' },
+                { id: 'os3', name: 'World Joint Presentation (SDGs)', organization: 'With The World', dates: 'Project: Dec - Feb; Presentation: Feb 15, 2026', deadline: 'Dec 8, 2025', deadlineSort: '2025-12-08', locationFocus: 'Global', cost: 'Free', strands: ['Service', 'Creativity'], primaryStrandSort: 'Service', description: 'Work in a team to research an SDG and present your findings to an international audience of peers.', urlDeadline: 'Application form at https://forms.gle/NgHYKGiHGfD9X7Tr7.', reflectionPrompts: 'What new perspectives did you gain from your international teammates? How did your team collaborate to synthesize complex information into a clear presentation?' },
+                { id: 'os4', name: 'Music Event Planning Project', organization: 'NPO Blast Beat', dates: 'Long-term: Dec 7, 2025 - Mar 31, 2026', deadline: 'Check site', deadlineSort: '2025-12-07', locationFocus: 'Japan Focus', cost: 'Free', strands: ['Service', 'Creativity'], primaryStrandSort: 'Service', description: 'Join a team to plan, promote, and execute a unique music event over 100 days, with proceeds donated.', urlDeadline: 'Visit activo.jp and search for NPO Blast Beat.', reflectionPrompts: 'What was the biggest challenge in working collaboratively on a long-term project? How did you apply creative thinking to solve logistical or promotional problems?' },
+                { id: 'os5', name: 'Citizen Science: Planet Hunters TESS', organization: 'Zooniverse / University of Oxford', dates: 'Ongoing', deadline: 'Ongoing', deadlineSort: '2099-12-31', locationFocus: 'Global', cost: 'Free', strands: ['Service'], primaryStrandSort: 'Service', description: 'Analyze real light curve data from NASA\'s TESS satellite to help astronomers identify potential exoplanets.', urlDeadline: 'https://www.zooniverse.org/projects/nora-dot-eisner/planet-hunters-tess', reflectionPrompts: 'How does your contribution fit into the larger scientific process of discovering a planet? Reflect on the balance between human pattern recognition and computer algorithms in this research.' },
+                { id: 'os6', name: 'Citizen Science: Stall Catchers', organization: 'SciStarter / Cornell University', dates: 'Ongoing', deadline: 'Ongoing', deadlineSort: '2099-12-31', locationFocus: 'Global', cost: 'Free', strands: ['Service'], primaryStrandSort: 'Service', description: 'Play an online game to analyze videos of blood vessels in mouse brains, helping to accelerate Alzheimer\'s research.', urlDeadline: 'https://scistarter.org/stall-catchers-by-eyesonalz', reflectionPrompts: 'Analyze the use of "gamification" in this project. How did the points and leaderboards affect your motivation? What are the ethical implications of using a game for medical research?' },
+                // CREATIVITY
+                { id: 'oc1', name: '"World Children\'s Day" Human Rights Video Contest', organization: 'Human Rights Now (HRN)', dates: 'Submission period ends Nov 3', deadline: 'Nov 3, 2025', deadlineSort: '2025-11-03', locationFocus: 'Global', cost: 'Free', strands: ['Creativity', 'Service'], primaryStrandSort: 'Creativity', description: 'Use the medium of film or animation to explore and communicate a human rights issue.', urlDeadline: 'Search for the contest on univ-journal.jp/contest-top/.', reflectionPrompts: 'How did you use creative storytelling techniques to convey a complex social issue? What ethical considerations did you face when representing this topic?' },
+                { id: 'oc2', name: 'Business Idea & Plan Contests', organization: 'Various Universities/Cities', dates: 'Various deadlines in November', deadline: 'Various in Nov', deadlineSort: '2025-11-30', locationFocus: 'Japan Focus', cost: 'Free', strands: ['Creativity'], primaryStrandSort: 'Creativity', description: 'Develop and present a business idea. Contests include Takasaki Shoka Univ. (Nov 5), Hagi City (Nov 7), and MyNavi Career Koshien (Nov 28).', urlDeadline: 'Search for specific contests on sites like business-plan-contest.com.', reflectionPrompts: 'What was the most challenging part of turning an idea into a viable business plan? What new skills (e.g., market research, financial planning) did you develop?' },
+                { id: 'oc3', name: 'Cygames Creative Contest', organization: 'Cygames', dates: 'Submission period ends Nov 25', deadline: 'Nov 25, 2025', deadlineSort: '2025-11-25', locationFocus: 'Global', cost: 'Free', strands: ['Creativity'], primaryStrandSort: 'Creativity', description: 'Submit digital art, 3DCG, or game design concepts to a major contest with a dedicated high school division.', urlDeadline: 'https://contest.cygames.co.jp/', reflectionPrompts: 'Document your creative process from initial concept to final piece. What feedback did you receive, and how did you incorporate it into your work?' },
+                { id: 'oc4', name: 'Literary Contests (Short Story & Novel)', organization: 'Various Publishers', dates: 'Various deadlines in December', deadline: 'Various in Dec', deadlineSort: '2025-12-31', locationFocus: 'Japan Focus', cost: 'Free', strands: ['Creativity'], primaryStrandSort: 'Creativity', description: 'Write and submit an original work of fiction. Options range from short stories (Hoshi Hoshi Contest, Dec 30) to full novels (Taisho Dazai Prize, Dec 10).', urlDeadline: 'Search for specific contests on sites like creative-story.net.', reflectionPrompts: 'How did you develop your characters and plot? What challenges did you face in the writing and editing process, and how did you demonstrate perseverance to complete your work?' },
+                { id: 'oc5', name: 'Mobile App Contest 2025', organization: 'Tokyo Metropolitan Board of Education', dates: 'Submission period ends Nov 21', deadline: 'Nov 21, 2025', deadlineSort: '2025-11-21', locationFocus: 'Japan Focus', cost: 'Free', strands: ['Creativity'], primaryStrandSort: 'Creativity', description: 'Design and develop a mobile application that addresses a social or practical issue. Excellent for coding, UX/UI design, and project management skills.', urlDeadline: 'Search for "モバイルアプリコンテスト 2025" on univ-journal.jp/contest-top/.', reflectionPrompts: 'Describe the problem-solving process for the most difficult bug you encountered. How did your UI design choices aim to solve a specific user need?' },
+                { id: 'oc6', name: 'Inquiry Contest 2025', organization: 'Benesse & others', dates: 'Application opens Nov 1; Submission Jan 20, 2026', deadline: 'Jan 20, 2026', deadlineSort: '2026-01-20', locationFocus: 'Japan Focus', cost: 'Free', strands: ['Creativity'], primaryStrandSort: 'Creativity', description: 'A contest focused on the process of research and inquiry itself. Present findings from a long-term research project. Ideal for synthesizing work from an Extended Essay or other assessments.', urlDeadline: 'https://tankyucontest.jp/', reflectionPrompts: 'How did you refine your research question over time? What was the most surprising piece of data you found, and how did it change your conclusion?' },
+                // ACTIVITY
+                { id: 'oa1', name: 'Pink Ribbon Walk & Run 2025', organization: 'RUNNET', dates: 'Event ends Nov 2', deadline: 'Oct 31, 2025 (Entry)', deadlineSort: '2025-10-31', locationFocus: 'Global', cost: 'Paid', strands: ['Activity', 'Service'], primaryStrandSort: 'Activity', description: 'Participate in a virtual walk or run (1km, 10km, or 45km) to support breast cancer awareness.', urlDeadline: 'Search for "Pink Ribbon Walk & Run" on runnet.jp.', reflectionPrompts: 'In addition to your physical activity, what did you learn about the cause it supports? How does connecting physical activity to a social cause affect your motivation?' },
+                { id: 'oa2', name: 'Fujisan Marathon TATTA RUN Series', organization: 'R-bies Sports Foundation', dates: 'Nov 1 - Nov 10', deadline: 'Check site', deadlineSort: '2025-11-01', locationFocus: 'Global', cost: 'Paid', strands: ['Activity'], primaryStrandSort: 'Activity', description: 'Complete a 10km, 17km, or full marathon distance over a 10-day period using a GPS tracking app.', urlDeadline: 'https://mtfujimarathon.com/virtual-run-autumn/', reflectionPrompts: 'Create a training plan for this event. Use your running app\'s data to analyze your performance. How did your physical and mental state change over the training period?' },
+                { id: 'oa3', name: 'Saroma Lake 100km Online Challenge', organization: 'R-bies Sports Foundation', dates: 'Nov 1 - Dec 31 (2-month challenge)', deadline: 'Nov 26, 2025 (Entry)', deadlineSort: '2025-11-26', locationFocus: 'Global', cost: 'Paid', strands: ['Activity'], primaryStrandSort: 'Activity', description: 'A long-term challenge to cumulatively run 100km over one or two months.', urlDeadline: 'Search for "Saroma Lake" on runnet.jp.', reflectionPrompts: 'A multi-month event requires significant planning. How did you schedule your runs to balance them with academics? Reflect on the challenges of maintaining motivation over a long period.' },
+                { id: 'oa4', name: 'Okinawa 100K Ultra Marathon by TATTA', organization: 'R-bies Sports Foundation', dates: 'Dec 15 - Dec 28', deadline: 'Dec 8, 2025 (Entry)', deadlineSort: '2025-12-08', locationFocus: 'Global', cost: 'Paid', strands: ['Activity'], primaryStrandSort: 'Activity', description: 'A year-end challenge with cumulative distance options of 50km, 100km, or 200km.', urlDeadline: 'Search for "Okinawa 100K" on runnet.jp.', reflectionPrompts: 'This is an intensive challenge. How did you prepare your body for the increased physical demand? What strategies did you use to overcome fatigue and complete your goal?' }
             ];
         },
 
@@ -404,40 +297,29 @@ function casApp() {
             if (this.filters.strand) {
                 tempActivities = tempActivities.filter(act => act.strands.includes(this.filters.strand));
             }
-            if (this.filters.focus) {
-                tempActivities = tempActivities.filter(act => act.focus === this.filters.focus);
+            if (this.filters.locationFocus) {
+                tempActivities = tempActivities.filter(act => act.locationFocus === this.filters.locationFocus);
             }
             if (this.filters.cost) {
                 tempActivities = tempActivities.filter(act => act.cost === this.filters.cost);
             }
             if (this.filters.month) {
-                const month = this.filters.month;
-                tempActivities = tempActivities.filter(act => {
-                    if (month === 'Ongoing') {
-                        // If "Ongoing" is selected, show *only* ongoing
-                        return act.dates.includes('Ongoing');
-                    }
-                    // If "November" or "December" is selected, show items matching that month *or* Ongoing
-                    return act.dates.includes(month) || act.dates.includes('Ongoing');
-                });
+                const monthLower = this.filters.month.toLowerCase();
+                tempActivities = tempActivities.filter(act => act.dates.toLowerCase().includes(monthLower));
             }
             
             this.filteredActivities = tempActivities;
-            this.sortActivities(); 
+            this.sortActivities();
         },
         
         sortActivities() {
             let sorted = [...this.filteredActivities];
-            if (this.sortBy === 'name') {
-                sorted.sort((a, b) => a.name.localeCompare(b.name));
-            } else if (this.sortBy === 'organization') {
-                sorted.sort((a, b) => {
-                    const orgA = a.contact.split(' ')[0].replace('www.', '').replace('http://', '').replace('https://', '');
-                    const orgB = b.contact.split(' ')[0].replace('www.', '').replace('http://', '').replace('https://', '');
-                    return orgA.localeCompare(orgB);
-                });
-            } else if (this.sortBy === 'strand') {
-                sorted.sort((a, b) => a.primaryStrand.localeCompare(b.primaryStrand));
+            if (this.sortBy === 'deadline') {
+                sorted.sort((a, b) => new Date(a.deadlineSort) - new Date(b.deadlineSort));
+            } else if (this.sortBy === 'name') { 
+                sorted.sort((a, b) => a.name.localeCompare(b.name)); 
+            } else if (this.sortBy === 'strand') { 
+                sorted.sort((a,b) => a.primaryStrandSort.localeCompare(b.primaryStrandSort)); 
             }
             this.filteredActivities = sorted;
         },
@@ -448,61 +330,39 @@ function casApp() {
             return this.filteredActivities.slice(start, end);
         },
 
-        get totalPages() {
-            return Math.ceil(this.filteredActivities.length / this.itemsPerPage);
-        },
+        get totalPages() { return Math.ceil(this.filteredActivities.length / this.itemsPerPage); },
         
         get pageNumbers() {
             const numbers = [];
             const maxPagesToShow = 5;
             let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
             let endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
+            if (endPage - startPage + 1 < maxPagesToShow) { startPage = Math.max(1, endPage - maxPagesToShow + 1); }
             
-            if (endPage - startPage + 1 < maxPagesToShow) {
-                 startPage = Math.max(1, endPage - maxPagesToShow + 1);
-            }
-
-            for (let i = startPage; i <= endPage; i++) {
-                numbers.push(i);
+            // This ensures that even if totalPages is 0, it doesn't try to loop.
+            // And if totalPages is 1, it shows '1'.
+            if (this.totalPages > 0) {
+                 for (let i = startPage; i <= endPage; i++) { numbers.push(i); }
             }
             return numbers;
         },
 
-        nextPage() {
-            if (this.currentPage < this.totalPages) this.currentPage++;
-        },
-
-        prevPage() {
-            if (this.currentPage > 1) this.currentPage--;
-        },
-        
-        goToPage(pageNumber) {
-            this.currentPage = pageNumber;
-        },
-
-        openModal(activity) {
-            this.selectedActivity = activity;
-        },
-
-        closeModal() {
-            this.selectedActivity = null;
-        },
+        nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
+        prevPage() { if (this.currentPage > 1) this.currentPage--; },
+        goToPage(pageNumber) { this.currentPage = pageNumber; },
+        openModal(activity) { this.selectedActivity = activity; },
+        closeModal() { this.selectedActivity = null; },
 
         formatContact(contactInfo) {
             if (!contactInfo) return 'N/A';
-            const urlRegex = /(https?:\/\/[^\s\[]+|[a-zA-Z0-9.-]+\.[a-z]{2,})/g;
+            const urlRegex = /(https?:\/\/[^\s"<>]+)/g;
             const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
-            
-            let formatted = contactInfo.replace(urlRegex, (match) => {
-                if (match.startsWith('http')) {
-                    return `<a href="${match}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline break-all">${match}</a>`;
-                }
-                if (match.includes('@')) {
-                     return `<a href="mailto:${match}" class="text-blue-600 hover:underline break-all">${match}</a>`;
-                }
-                return `<a href="https://${match}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline break-all">${match}</a>`;
+            let formatted = contactInfo;
+            formatted = formatted.replace(urlRegex, (url) => {
+                let cleanUrl = url.endsWith('.')? url.slice(0, -1) : url;
+                return `<a href="${cleanUrl}" target="_blank" class="text-orange-600 hover:underline">${cleanUrl}</a>` + (url.endsWith('.')? '.' : '');
             });
-            formatted = formatted.replace(emailRegex, '<a href="mailto:$1" class="text-blue-600 hover:underline break-all">$1</a>');
+            formatted = formatted.replace(emailRegex, '<a href="mailto:$1" class="text-orange-600 hover:underline">$1</a>');
             return formatted;
         }
     };
@@ -510,4 +370,4 @@ function casApp() {
 </script>
 </body>
 </html>
-
+```eof
