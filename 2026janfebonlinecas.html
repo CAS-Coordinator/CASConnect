@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Online CAS Navigator (Jan-Feb 2026)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for the Global Theme breakdown -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Chosen Palette: Midnight & Neon Mint - Designed to feel high-tech and globally connected. -->
+    
+    <!-- Application Structure Plan:
+        1. Visual Impact Header: A dynamic doughnut chart showing the 'Global Need' breakdown.
+        2. Opportunity Grid: Categorized listings from Zooniverse, Amnesty, and UNV.
+        3. CAS Task Modals: Deep-dives into Learning Outcomes and specific digital tasks.
+        4. Portfolio Advice: Strategy on how to document 'invisible' online work.
+    -->
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .cyber-card {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-card:hover {
+            border-color: #10b981;
+            transform: translateY(-4px);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+        }
+
+        .tag-creativity { color: #fbbf24; border: 1px solid #fbbf24; background: rgba(251, 191, 36, 0.05); }
+        .tag-activity { color: #38bdf8; border: 1px solid #38bdf8; background: rgba(56, 189, 248, 0.05); }
+        .tag-service { color: #10b981; border: 1px solid #10b981; background: rgba(16, 185, 129, 0.05); }
+
+        [x-cloak] { display: none !important; }
+
+        /* Ensuring chart takes up space */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body x-data="onlineCasApp()">
+
+    <!-- Navbar -->
+    <nav class="glass-panel sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-slate-900 font-bold">V</div>
+            <span class="text-xl font-bold tracking-tight">Virtual <span class="text-emerald-500">CAS</span></span>
+        </div>
+        <div class="hidden md:flex gap-8 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <a href="#impact" class="hover:text-emerald-400 transition-colors">Global Impact</a>
+            <a href="#explorer" class="hover:text-emerald-400 transition-colors">Explorer</a>
+            <a href="#advice" class="hover:text-emerald-400 transition-colors">Portfolio Advice</a>
+        </div>
+        <div class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] font-black uppercase">
+            Jan - Feb 2026
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        
+        <!-- Section 1: Impact Breakdown (The Fixed Visualization) -->
+        <section id="impact" class="mb-20">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-4xl font-extrabold mb-6 leading-tight">Quantifying Your <br><span class="text-emerald-500">Digital Footprint</span></h2>
+                    <p class="text-slate-400 text-lg mb-8 leading-relaxed">
+                        Online CAS isn't just "filling time"—it's about addressing specific global thematic needs. In early 2026, the demand for <span class="text-emerald-400">Environmental Data Analysis</span> and <span class="text-emerald-400">Human Rights Solidary</span> remains critical. The chart provides a snapshot of where your digital service can have the most impact right now.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
+                            <p class="text-sm font-bold text-slate-500 uppercase">Available Opportunities</p>
+                            <p class="text-2xl font-bold text-white">800+</p>
+                        </div>
+                        <div class="bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
+                            <p class="text-sm font-bold text-slate-500 uppercase">Verified Platforms</p>
+                            <p class="text-2xl font-bold text-white">12</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 rounded-[2rem] border border-slate-800 shadow-2xl">
+                    <h3 class="text-center text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Opportunities by Global Theme (Live Data)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="impactChart"></canvas>
+                    </div>
+                    <p class="mt-6 text-[10px] text-center text-slate-500 italic">Breakdown of curated activities across Zooniverse, Amnesty, and UNV portals.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Explorer Dashboard -->
+        <section id="explorer" class="mb-20">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-10">
+                <div>
+                    <h3 class="text-2xl font-bold mb-2">Virtual Activity Explorer</h3>
+                    <p class="text-slate-500 text-sm">Every listing has been audited for CAS suitability and LO alignment.</p>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <select x-model="filters.strand" @change="applyFilters" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold uppercase text-slate-300 outline-none focus:border-emerald-500">
+                        <option value="">All Strands</option>
+                        <option value="Creativity">Creativity</option>
+                        <option value="Activity">Activity</option>
+                        <option value="Service">Service</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="item in filteredActivities" :key="item.id">
+                    <div @click="openModal(item)" class="cyber-card rounded-2xl p-6 cursor-pointer flex flex-col justify-between group">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="text-[9px] font-bold tracking-widest uppercase text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded" x-text="item.org"></span>
+                                <span class="text-[10px] font-bold text-slate-600" x-text="item.focus"></span>
+                            </div>
+                            <h4 class="text-lg font-bold mb-3 group-hover:text-emerald-400 transition-colors" x-text="item.title"></h4>
+                            <p class="text-slate-500 text-sm mb-6 line-clamp-3 leading-relaxed" x-text="item.summary"></p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="strand in item.strands" :key="strand">
+                                <span :class="'text-[9px] font-black px-2 py-1 rounded border ' + getTagClass(strand)" x-text="strand"></span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <!-- Section 3: Portfolio Strategy -->
+        <section id="advice" class="mb-20">
+            <div class="bg-emerald-500 rounded-[2.5rem] p-10 text-slate-900 shadow-2xl shadow-emerald-500/10">
+                <h3 class="text-3xl font-black mb-8">Refining Your Digital Evidence</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <div class="space-y-4">
+                        <div class="text-3xl font-black text-slate-900/30">01</div>
+                        <h4 class="font-bold text-xl leading-tight">Capture the Process</h4>
+                        <p class="text-sm font-medium opacity-80 leading-relaxed">Don't just show the finished letter or the 'Project Complete' screen. Record 30 seconds of your screen while you are doing the work to prove active engagement.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="text-3xl font-black text-slate-900/30">02</div>
+                        <h4 class="font-bold text-xl leading-tight">Link to LO6</h4>
+                        <p class="text-sm font-medium opacity-80 leading-relaxed">Online activities are perfect for 'Global Significance'. Use your reflection to explain how your small local task contributes to a massive international dataset.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="text-3xl font-black text-slate-900/30">03</div>
+                        <h4 class="font-bold text-xl leading-tight">Verify via Dashboards</h4>
+                        <p class="text-sm font-medium opacity-80 leading-relaxed">Most platforms (Zooniverse, Charity Miles) have a profile page with stats. Use a screenshot of this 'Stats' page as your primary verification signature.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Detail Modal -->
+    <div x-show="modalOpen" 
+         x-cloak
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden"
+         @keydown.escape.window="closeModal()">
+        
+        <div class="fixed inset-0 bg-slate-950/90 backdrop-blur-md"
+             x-show="modalOpen"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             @click="closeModal()"></div>
+
+        <div class="bg-slate-900 rounded-[2rem] w-full max-w-2xl relative z-10 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-slate-800"
+             x-show="modalOpen"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="ease-in duration-200">
+            
+            <div class="p-8 border-b border-slate-800 bg-slate-800/30 flex justify-between items-center">
+                <div>
+                    <span class="text-[10px] font-bold tracking-widest uppercase text-emerald-500 mb-1 block" x-text="activeItem?.org"></span>
+                    <h4 class="text-2xl font-bold" x-text="activeItem?.title"></h4>
+                </div>
+                <button @click="closeModal()" class="w-10 h-10 rounded-full hover:bg-slate-800 flex items-center justify-center text-slate-500">✕</button>
+            </div>
+
+            <div class="p-8 overflow-y-auto custom-scrollbar flex-grow">
+                <div class="space-y-8">
+                    <div>
+                        <h5 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Core Task Analysis</h5>
+                        <ul class="space-y-3">
+                            <template x-for="task in activeItem?.tasks" :key="task">
+                                <li class="flex items-start gap-4 text-sm text-slate-300 leading-relaxed">
+                                    <span class="text-emerald-500 mt-1">▹</span>
+                                    <span x-text="task"></span>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+
+                    <div class="bg-emerald-500/5 rounded-2xl p-6 border border-emerald-500/10">
+                        <h5 class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-4">Mapping to Learning Outcomes</h5>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="lo in activeItem?.lo" :key="lo">
+                                <span class="bg-slate-800 text-emerald-400 text-[9px] font-bold px-3 py-1.5 rounded-md border border-slate-700" x-text="lo"></span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-slate-800/50 border border-slate-700">
+                        <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <span>💻</span> Digital Reflection Prompt
+                        </h5>
+                        <p class="text-sm text-slate-300 italic leading-relaxed" x-text="activeItem?.prompt"></p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Accessibility</p>
+                            <p class="text-xs font-bold text-slate-300" x-text="activeItem?.focus"></p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Official Portal</p>
+                            <a :href="activeItem?.url" target="_blank" class="text-xs font-bold text-emerald-400 hover:underline">Launch Activity &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-12 border-t border-slate-800 text-center opacity-30">
+        <p class="text-[10px] uppercase tracking-[0.3em] font-black">Global Virtual Intelligence Hub • 2026</p>
+    </footer>
+
+    <script>
+        function onlineCasApp() {
+            return {
+                modalOpen: false,
+                activeItem: null,
+                filters: { strand: '' },
+                chartInstance: null,
+                activities: [
+                    {
+                        id: 1,
+                        title: "Planet Hunters TESS",
+                        org: "Zooniverse / NASA",
+                        focus: "Global (English)",
+                        summary: "Identify transits of exoplanets in real light curve data from NASA's Transiting Exoplanet Survey Satellite (TESS).",
+                        strands: ["Service"],
+                        lo: ["LO6: Global Significance", "LO4: Commitment & Perseverance"],
+                        tasks: [
+                            "Analyze light-intensity graphs to identify potential planet transits.",
+                            "Classify transit shapes for verification by professional astronomers.",
+                            "Contribute to a community dataset used for published research."
+                        ],
+                        prompt: "How does the 'democratization' of science through online platforms affect our ability to solve complex global research problems?",
+                        url: "https://www.zooniverse.org/projects/nora-dot-eisner/planet-hunters-tess"
+                    },
+                    {
+                        id: 2,
+                        title: "Write for Rights 2026",
+                        org: "Amnesty Japan",
+                        focus: "Japan Focus / Global",
+                        summary: "Participate in the world's largest letter-writing campaign to support human rights defenders at risk.",
+                        strands: ["Service", "Creativity"],
+                        lo: ["LO7: Ethical Choices", "LO3: Initiative & Planning"],
+                        tasks: [
+                            "Research specific human rights cases designated for 2026.",
+                            "Draft persuasive and respectful letters to global authorities (Service).",
+                            "Design digital solidarity cards for victims and their families (Creativity)."
+                        ],
+                        prompt: "Is a letter an effective form of service in the digital age? Analyze the ethics of international solidarity from your perspective in Japan.",
+                        url: "https://www.amnesty.or.jp/"
+                    },
+                    {
+                        id: 3,
+                        title: "Charity Miles Challenge",
+                        org: "Charity Miles Foundation",
+                        focus: "Global (Mobile App)",
+                        summary: "Turn your walking, running, or cycling distance into real corporate-sponsored donations for a chosen global charity.",
+                        strands: ["Activity", "Service"],
+                        lo: ["LO1: Strength & Growth", "LO4: Commitment"],
+                        tasks: [
+                            "Set a physical endurance goal (e.g., 50km in Feb).",
+                            "Track all physical movement via the GPS mobile interface (Activity).",
+                            "Log and document the cumulative donation generated for your charity (Service)."
+                        ],
+                        prompt: "How did having a 'service goal' affect your motivation to complete your physical exercise during the cold winter months?",
+                        url: "https://charitymiles.org/"
+                    },
+                    {
+                        id: 4,
+                        title: "Kids Code Club Mentor",
+                        org: "Activo Japan",
+                        focus: "Japan Focus (Japanese)",
+                        summary: "Remotely mentor elementary school children in Japan who are learning to code using Scratch or basic Python.",
+                        strands: ["Service", "Creativity"],
+                        lo: ["LO5: Collaboration", "LO2: New Skills"],
+                        tasks: [
+                            "Review student code and provide encouraging, constructive feedback.",
+                            "Lead 30-minute mini-coding challenges via Zoom or Discord.",
+                            "Design creative project templates to inspire younger coders."
+                        ],
+                        prompt: "What were the challenges of explaining complex logic to a child over a digital interface, and how did you adapt your style?",
+                        url: "https://activo.jp/"
+                    },
+                    {
+                        id: 5,
+                        title: "Be My Eyes Volunteer",
+                        org: "Be My Eyes Foundation",
+                        focus: "Global (Multilingual)",
+                        summary: "Provide live visual assistance to blind or low-vision people through a video call on your smartphone.",
+                        strands: ["Service"],
+                        lo: ["LO7: Ethical Choices", "LO6: Global Significance"],
+                        tasks: [
+                            "Assist with real-time visual tasks (e.g., checking expiration dates, identifying colors).",
+                            "Describe surroundings or navigation cues through a mobile camera.",
+                            "Provide on-demand support for international users in your language."
+                        ],
+                        prompt: "Reflect on the power of technology to solve accessibility issues. How did it feel to be someone's 'eyes' across a digital bridge?",
+                        url: "https://www.bemyeyes.com/"
+                    }
+                ],
+
+                get filteredActivities() {
+                    return this.activities.filter(a => this.filters.strand === '' || a.strands.includes(this.filters.strand));
+                },
+
+                applyFilters() {
+                    // Logic handled by Alpine's getter, this just triggers updates if needed
+                },
+
+                openModal(item) {
+                    this.activeItem = item;
+                    this.modalOpen = true;
+                    document.body.style.overflow = 'hidden';
+                },
+
+                closeModal() {
+                    this.modalOpen = false;
+                    document.body.style.overflow = 'auto';
+                },
+
+                getTagClass(s) {
+                    return 'tag-' + s.toLowerCase();
+                },
+
+                init() {
+                    this.$nextTick(() => {
+                        this.renderChart();
+                    });
+                },
+
+                renderChart() {
+                    const ctx = document.getElementById('impactChart');
+                    if (!ctx) return;
+                    
+                    if (this.chartInstance) {
+                        this.chartInstance.destroy();
+                    }
+
+                    this.chartInstance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Environment', 'Human Rights', 'Education', 'Accessibility'],
+                            datasets: [{
+                                data: [40, 25, 20, 15],
+                                backgroundColor: ['#10b981', '#fbbf24', '#38bdf8', '#818cf8'],
+                                borderColor: '#020617',
+                                borderWidth: 4,
+                                hoverOffset: 15
+                            }]
+                        },
+                        options: {
+                            cutout: '75%',
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: '#94a3b8',
+                                        font: { family: 'Plus Jakarta Sans', size: 10, weight: 'bold' },
+                                        padding: 20
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+```
