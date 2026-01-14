@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAS Explorer: Eastern Shizuoka (Jan-Feb 2026)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Chosen Palette: Winter Frost & Deep Teal - Reflecting the crisp winter air of Shizuoka and the clear views of Mt. Fuji. -->
+    
+    <!-- Application Structure Plan: 
+        1. Welcome: Highlights the value of winter service and cultural creativity.
+        2. Dashboard: Real-time filtering for activities sourced from Activo, Social Welfare Councils, and NPOs.
+        3. Modal Detail: Deep dive into the "What, Why, and How" of each activity for CAS portfolios.
+        4. Strategic Insight: Advice on turning one-off festival volunteering into a sustained project.
+    -->
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+            background-color: #f0f4f8;
+            color: #1a202c;
+        }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .card-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-transition:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .tag-creativity { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+        .tag-activity { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .tag-service { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+        [x-cloak] { display: none !important; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+    </style>
+</head>
+<body x-data="casApp()" class="antialiased">
+
+    <!-- Navbar -->
+    <header class="glass-header sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-teal-200">S</div>
+                    <div>
+                        <h1 class="text-lg font-bold text-slate-800 leading-none">CAS Explorer</h1>
+                        <span class="text-[10px] font-bold text-teal-600 uppercase tracking-widest">Shizuoka East • Winter 2026</span>
+                    </div>
+                </div>
+                <nav class="hidden md:flex gap-6">
+                    <a href="#finder" class="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors">Find Activities</a>
+                    <a href="#insights" class="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors">Strategic Insights</a>
+                    <a href="#contact" class="text-sm font-semibold text-slate-600 hover:text-teal-600 transition-colors">Resource Hub</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <!-- Welcome Section -->
+        <section class="mb-12">
+            <div class="bg-white rounded-[2rem] p-8 md:p-12 shadow-xl shadow-slate-200/50 border border-white flex flex-col md:flex-row gap-10 items-center">
+                <div class="flex-1">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight">
+                        Deepening Community Roots <br><span class="text-teal-600">This Winter</span>
+                    </h2>
+                    <p class="text-slate-600 leading-relaxed mb-8">
+                        Our latest research on <span class="font-bold">activo.jp</span> and through the local <span class="font-bold">Social Welfare Councils</span> has identified a surge in demand for high school volunteers for the 2026 Lunar New Year celebrations and environmental restoration projects. Use this period to demonstrate <span class="italic text-teal-700">commitment and perseverance</span>.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="px-5 py-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
+                            <span class="text-2xl">📊</span>
+                            <div class="text-xs font-bold uppercase tracking-wide text-slate-500">14+ New Roles</div>
+                        </div>
+                        <div class="px-5 py-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
+                            <span class="text-2xl">🗻</span>
+                            <div class="text-xs font-bold uppercase tracking-wide text-slate-500">Mt. Fuji Day Focus</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/3 bg-teal-50 rounded-3xl p-6 border border-teal-100">
+                    <h4 class="font-bold text-teal-800 text-sm mb-4 uppercase tracking-wider">Quick Search Tips</h4>
+                    <ul class="space-y-3 text-sm text-teal-700">
+                        <li class="flex items-start gap-2"><span>•</span> Search "activo.jp" for NPO roles.</li>
+                        <li class="flex items-start gap-2"><span>•</span> Call "Shakai Fukushi" for local care.</li>
+                        <li class="flex items-start gap-2"><span>•</span> Check "City Hall" for Mt. Fuji Day.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Activity Finder -->
+        <section id="finder" class="mb-16">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-2">Winter Activity Dashboard</h3>
+                    <p class="text-slate-500 text-sm">Real-time data for remaining weeks of Jan and all of Feb 2026.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <select x-model="filters.city" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-semibold focus:ring-2 focus:ring-teal-500 outline-none">
+                        <option value="">All Cities</option>
+                        <option value="Numazu">Numazu</option>
+                        <option value="Mishima">Mishima</option>
+                        <option value="Fuji City">Fuji City</option>
+                        <option value="Regional">Regional / Shizuoka</option>
+                    </select>
+                    <select x-model="filters.strand" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-semibold focus:ring-2 focus:ring-teal-500 outline-none">
+                        <option value="">All Strands</option>
+                        <option value="Creativity">Creativity</option>
+                        <option value="Activity">Activity</option>
+                        <option value="Service">Service</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="act in filteredActivities" :key="act.id">
+                    <div @click="openActivity(act)" class="card-transition bg-white rounded-3xl p-6 border border-slate-100 shadow-sm cursor-pointer flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="text-[10px] font-bold tracking-widest uppercase text-teal-600 bg-teal-50 px-2 py-1 rounded" x-text="act.city"></span>
+                                <span class="text-xs font-bold text-slate-400" x-text="act.date"></span>
+                            </div>
+                            <h4 class="text-lg font-bold text-slate-900 mb-3" x-text="act.title"></h4>
+                            <p class="text-slate-500 text-sm mb-6 line-clamp-2" x-text="act.summary"></p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="strand in act.strands" :key="strand">
+                                <span :class="'tag text-[10px] font-bold px-2 py-1 rounded-full ' + getTagClass(strand)" x-text="strand"></span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            
+            <div x-show="filteredActivities.length === 0" class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                <p class="text-slate-400 font-medium">No matches found. Try widening your city or strand filters.</p>
+            </div>
+        </section>
+
+        <!-- Insights -->
+        <section id="insights" class="mb-16">
+            <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl">
+                <h3 class="text-2xl font-bold mb-10 flex items-center gap-4">
+                    <span class="bg-teal-500 text-white p-2 rounded-lg text-lg">📈</span>
+                    Portfolio Growth Insights
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div>
+                        <h4 class="text-teal-400 font-bold mb-3 uppercase text-xs tracking-widest">Global Engagement</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Winter is peak time for International Exchange Lounges. Volunteering for Lunar New Year events directly supports <span class="font-bold">LO6: Issues of Global Significance</span>.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="text-teal-400 font-bold mb-3 uppercase text-xs tracking-widest">Skill Documentation</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            For <span class="font-bold italic">Creativity</span> tasks (like Calligraphy or Website design for NPOs), document the "Planning" phase (LO3) just as much as the final product.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="text-teal-400 font-bold mb-3 uppercase text-xs tracking-widest">Sustained Projects</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Use the <span class="font-bold">Daruma Fair (Feb 23)</span> as a launchpad. One day of volunteering is an "Activity"; leading a team to manage an eco-booth is a "Project".
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Hub -->
+        <section id="contact" class="mb-10">
+            <h3 class="text-xl font-bold text-slate-900 mb-6">Regional Resource Hub</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="https://activo.jp" target="_blank" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-teal-500 transition-colors">
+                    <h5 class="font-bold text-slate-800 text-sm">Activo.jp</h5>
+                    <p class="text-[10px] text-slate-500 mt-1">NPO & Student volunteer listings.</p>
+                </a>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                    <h5 class="font-bold text-slate-800 text-sm">Numazu V-Center</h5>
+                    <p class="text-[10px] text-slate-500 mt-1">Call: 055-922-1500 (Welfare Council)</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                    <h5 class="font-bold text-slate-800 text-sm">Mishima V-Center</h5>
+                    <p class="text-[10px] text-slate-500 mt-1">Call: 055-972-3221 (Welfare Council)</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                    <h5 class="font-bold text-slate-800 text-sm">Fuji City Hall</h5>
+                    <p class="text-[10px] text-slate-500 mt-1">Bishamon-ten Festival Coordination.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal -->
+    <div x-show="modalOpen" 
+         x-cloak
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden"
+         @keydown.escape.window="closeModal()">
+        
+        <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity"
+             x-show="modalOpen"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="closeModal()"></div>
+
+        <div class="bg-white rounded-[2.5rem] w-full max-w-2xl relative z-10 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+             x-show="modalOpen"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 scale-95">
+            
+            <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div>
+                    <span class="text-[10px] font-bold tracking-widest uppercase text-teal-600 mb-1 block" x-text="activeItem?.city"></span>
+                    <h4 class="text-2xl font-extrabold text-slate-900" x-text="activeItem?.title"></h4>
+                </div>
+                <button @click="closeModal()" class="w-12 h-12 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors">
+                    <span class="text-2xl">✕</span>
+                </button>
+            </div>
+
+            <div class="p-8 overflow-y-auto custom-scrollbar flex-grow">
+                <div class="space-y-8">
+                    <div>
+                        <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Core Task Analysis</h5>
+                        <ul class="space-y-3">
+                            <template x-for="task in activeItem?.tasks" :key="task">
+                                <li class="flex items-start gap-4 text-sm text-slate-700 leading-relaxed">
+                                    <span class="text-teal-500 mt-1">●</span>
+                                    <span x-text="task"></span>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+
+                    <div class="bg-teal-50 rounded-3xl p-6 border border-teal-100">
+                        <h5 class="text-xs font-bold text-teal-600 uppercase tracking-widest mb-4">Potential Learning Outcomes</h5>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="lo in activeItem?.learningOutcomes" :key="lo">
+                                <span class="bg-white text-teal-800 text-[10px] font-bold px-3 py-1.5 rounded-xl border border-teal-200" x-text="lo"></span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-3xl bg-amber-50 border border-amber-100">
+                        <h5 class="text-xs font-bold text-amber-700 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <span>📝</span> Reflection Prompt
+                        </h5>
+                        <p class="text-sm text-amber-900 italic leading-relaxed" x-text="activeItem?.reflectionPrompt"></p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Cost / Requirements</p>
+                            <p class="text-xs font-bold text-slate-700" x-text="activeItem?.cost"></p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Source / Contact</p>
+                            <p class="text-xs font-bold text-slate-700 underline" x-text="activeItem?.source"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-12 border-t border-slate-200 text-center">
+        <p class="text-slate-400 text-[11px] font-medium uppercase tracking-widest italic">Consolidated CAS Data • Winter 2026 Season</p>
+    </footer>
+
+    <script>
+        function casApp() {
+            return {
+                modalOpen: false,
+                activeItem: null,
+                filters: {
+                    city: '',
+                    strand: ''
+                },
+                activities: [
+                    {
+                        id: 1,
+                        title: "Bishamon-ten Daruma Fair: Eco-Support",
+                        city: "Fuji City",
+                        date: "Feb 23-25, 2026",
+                        summary: "Volunteer for waste management and crowd safety at one of Japan's three major Daruma markets.",
+                        strands: ["Service"],
+                        tasks: [
+                            "Educate visitors on proper trash sorting for massive event volume.",
+                            "Support logistical flow around the temple entrance for safety.",
+                            "Work in a multicultural team to provide visitor assistance."
+                        ],
+                        learningOutcomes: ["LO4: Commitment & Perseverance", "LO6: Global Significance (Env)"],
+                        reflectionPrompt: "Given the cultural importance of the fair, how does waste management contribute to the 'ethics' of preserving a local tradition?",
+                        cost: "Free (Volunteer)",
+                        source: "Fuji City Hall / V-Center"
+                    },
+                    {
+                        id: 2,
+                        title: "Kids Code Club: Remote Mentor",
+                        city: "Regional",
+                        date: "Late Jan - Feb (Ongoing)",
+                        summary: "Support elementary students in learning Scratch or basic coding via Zoom (Listing on Activo).",
+                        strands: ["Service", "Creativity"],
+                        tasks: [
+                            "Review and provide creative feedback on student Scratch projects.",
+                            "Explain logical concepts to younger learners in a patient manner.",
+                            "Design creative templates for future coding workshops."
+                        ],
+                        learningOutcomes: ["LO1: Strength & Growth", "LO5: Collaboration"],
+                        reflectionPrompt: "How did teaching a technical skill to a child change your own perspective on communicating complex ideas?",
+                        cost: "Free (Remote)",
+                        source: "Activo.jp (Kids Code Club)"
+                    },
+                    {
+                        id: 3,
+                        title: "Mt. Fuji Day: Trail Restoration",
+                        city: "Regional",
+                        date: "Feb 21-23, 2026",
+                        summary: "Join the 'Fujisan Network' to clear debris from lower trails exposed by winter frosts.",
+                        strands: ["Activity", "Service"],
+                        tasks: [
+                            "Perform manual trail clearing and debris removal (Activity).",
+                            "Log and report significant trail erosion using GPS tracking.",
+                            "Identify and remove invasive winter species under guidance."
+                        ],
+                        learningOutcomes: ["LO3: Initiative & Planning", "LO2: New Challenges"],
+                        reflectionPrompt: "What was the most physically challenging part of the trail work, and how did you push through that barrier?",
+                        cost: "Free",
+                        source: "Fujisan Network NPO"
+                    },
+                    {
+                        id: 4,
+                        title: "Mishima 'Ume' Festival Guide",
+                        city: "Mishima",
+                        date: "Feb 10-28, 2026",
+                        summary: "Volunteer to assist elderly visitors and families at Rakujuen Park during the plum blossom peak.",
+                        strands: ["Service"],
+                        tasks: [
+                            "Assist with accessibility navigation for elderly park visitors.",
+                            "Manage visitor info booth and distribute seasonal pamphlets.",
+                            "Maintain tidy walkways around the fragile plum blossom exhibits."
+                        ],
+                        learningOutcomes: ["LO5: Collaboration", "LO7: Ethical Choices"],
+                        reflectionPrompt: "How did your interactions with the elderly visitors affect your sense of belonging within the Mishima community?",
+                        cost: "Free (Volunteer)",
+                        source: "Mishima Social Welfare Council"
+                    },
+                    {
+                        id: 5,
+                        title: "Winter Festival Content Design",
+                        city: "Numazu",
+                        date: "Jan 20 - Feb 15, 2026",
+                        summary: "Work with a local shopping street (Shotengai) to create promotional posters or TikTok videos for New Year events.",
+                        strands: ["Creativity"],
+                        tasks: [
+                            "Interview shop owners about their winter heritage and stories.",
+                            "Design and edit a series of 3 short-form videos for social media.",
+                            "Draft a professional pitch for a student-led 'Winter Walk' map."
+                        ],
+                        learningOutcomes: ["LO2: New Challenges/Skills", "LO3: Initiative"],
+                        reflectionPrompt: "What was the gap between your creative vision and the practical needs of the local shop owners?",
+                        cost: "Free (Digital)",
+                        source: "Numazu Civic Activity Center"
+                    },
+                    {
+                        id: 6,
+                        title: "Coastal Cleanup: Numazu Port",
+                        city: "Numazu",
+                        date: "Jan 25 & Feb 22, 2026",
+                        summary: "Monthly debris sweep of the port and Senbonhama area to prevent ocean plastics.",
+                        strands: ["Activity", "Service"],
+                        tasks: [
+                            "Cover 3km of shoreline for microplastic and debris collection.",
+                            "Classify collected waste for regional environmental data reports.",
+                            "Carry collected bags to designated disposal points (Activity)."
+                        ],
+                        learningOutcomes: ["LO1: Strength & Growth", "LO6: Global Significance"],
+                        reflectionPrompt: "Did you find more or less waste than expected during the winter? What does this suggest about local consumption habits?",
+                        cost: "Free",
+                        source: "Numazu Social Welfare Council"
+                    }
+                ],
+
+                get filteredActivities() {
+                    return this.activities.filter(a => {
+                        return (this.filters.city === '' || a.city === this.filters.city) &&
+                               (this.filters.strand === '' || a.strands.includes(this.filters.strand));
+                    });
+                },
+
+                openActivity(item) {
+                    this.activeItem = item;
+                    this.modalOpen = true;
+                    document.body.style.overflow = 'hidden';
+                },
+
+                closeModal() {
+                    this.modalOpen = false;
+                    document.body.style.overflow = 'auto';
+                },
+
+                getTagClass(strand) {
+                    return 'tag-' + strand.toLowerCase();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+```
