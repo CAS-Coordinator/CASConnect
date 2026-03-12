@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAS Explorer: Eastern Shizuoka (Spring 2026)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        [x-cloak] { display: none!important; }
+    </style>
+</head>
+<body class="bg-pink-50 text-gray-800 font-sans" x-data="casApp()">
+
+    <header class="sticky top-0 z-50 bg-white shadow-md border-b border-rose-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-seedling text-green-600 text-2xl mr-3"></i>
+                    <span class="font-bold text-xl text-gray-900">CAS Explorer <span class="text-rose-500 font-medium">Spring 2026</span></span>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#finder" class="text-gray-600 hover:text-rose-600 px-3 py-2 font-medium transition">Activity Finder</a>
+                    <a href="#insights" class="text-gray-600 hover:text-rose-600 px-3 py-2 font-medium transition">Strategic Insights</a>
+                    <a href="#resources" class="text-gray-600 hover:text-rose-600 px-3 py-2 font-medium transition">Resource Hub</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="bg-gradient-to-r from-rose-100 to-green-100 rounded-2xl p-8 shadow-sm mb-12 border border-white">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-4">Spring 2026: Eastern Shizuoka CAS Opportunities</h1>
+            <p class="text-lg text-gray-700 mb-6 leading-relaxed">
+                March and April represent a critical transitional period in Japan. As the academic and fiscal years restart, there is an urgent demand for high school volunteers to support cherry blossom festivals, agricultural transitions, and educational orientations for foreign residents. Explore the curated opportunities across Numazu, Mishima, Fuji City, and the surrounding 20km radius to fulfill your Creativity, Activity, and Service requirements.
+            </p>
+        </div>
+
+        <section id="finder" class="mb-16">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-900"><i class="fa-solid fa-magnifying-glass mr-2 text-rose-500"></i> Activity Finder</h2>
+                
+                <div class="mt-4 md:mt-0 flex space-x-4">
+                    <select x-model="filters.city" class="rounded-lg border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 py-2 px-4 bg-white">
+                        <option value="All">All Locations</option>
+                        <option value="Numazu">Numazu</option>
+                        <option value="Mishima">Mishima</option>
+                        <option value="Fuji City">Fuji City</option>
+                        <option value="Susono">Susono</option>
+                        <option value="Nagaizumi">Nagaizumi</option>
+                        <option value="Remote">Remote / National</option>
+                    </select>
+
+                    <select x-model="filters.strand" class="rounded-lg border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 py-2 px-4 bg-white">
+                        <option value="All">All Strands</option>
+                        <option value="Creativity">Creativity</option>
+                        <option value="Activity">Activity</option>
+                        <option value="Service">Service</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="activity in filteredActivities" :key="activity.id">
+                    <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-100 flex flex-col cursor-pointer" @click="openModal(activity)">
+                        <div class="p-6 flex-grow">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-rose-600 bg-rose-50 py-1 px-2 rounded" x-text="activity.city"></span>
+                                <div class="flex space-x-1">
+                                    <template x-for="s in activity.strand">
+                                        <span class="text-xs font-bold text-white bg-green-500 py-1 px-2 rounded-full" x-text="s.charAt(0)"></span>
+                                    </template>
+                                </div>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2" x-text="activity.title"></h3>
+                            <p class="text-sm text-gray-500 mb-4"><i class="fa-regular fa-calendar mr-2"></i><span x-text="activity.date"></span></p>
+                            <p class="text-gray-700 text-sm line-clamp-3" x-text="activity.description"></p>
+                        </div>
+                        <div class="bg-gray-50 px-6 py-3 border-t border-gray-100 mt-auto text-sm text-rose-600 font-medium text-center">
+                            View Deep Dive <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </div>
+                    </div>
+                </template>
+                
+                <div x-show="filteredActivities.length === 0" class="col-span-full py-12 text-center bg-white rounded-xl border border-dashed border-gray-300">
+                    <i class="fa-solid fa-leaf text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500">No opportunities match your current filters.</p>
+                    <button @click="resetFilters" class="mt-4 text-rose-600 hover:underline">Reset Filters</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="insights" class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fa-solid fa-lightbulb mr-2 text-yellow-500"></i> Strategic Portfolio Insights</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-rose-100 border-l-4 border-l-rose-500">
+                    <h3 class="font-bold text-lg mb-2">Addressing Demographic Shifts</h3>
+                    <p class="text-sm text-gray-600">Local authorities increasingly rely on high school students to maintain civic functions. Treat events like the Ose Festival not as casual charity, but as urgent civic partnerships necessary for regional survival (LO6: Global Engagement).</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-green-100 border-l-4 border-l-green-500">
+                    <h3 class="font-bold text-lg mb-2">Overcoming Transport Friction</h3>
+                    <p class="text-sm text-gray-600">The 20km radius has limited public transit. Don't hide the logistical struggle! Use the hours spent calculating bus routes to isolated sites like the Toda River Light-up to fulfill LO3 (Initiative and Planning).</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-100 border-l-4 border-l-blue-500">
+                    <h3 class="font-bold text-lg mb-2">Remote Empathy Protocols</h3>
+                    <p class="text-sm text-gray-600">Engaging in remote counseling or the ASEAN Youth Summit? Be sure to reflect heavily on the strict digital privacy protocols and cross-cultural boundaries required for these tasks (LO7: Ethical Choices).</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="resources" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fa-solid fa-address-book mr-2 text-green-600"></i> Regional Resource Hub</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <span class="block font-bold text-gray-700 mb-1">Activo.jp</span>
+                    <a href="https://activo.jp" target="_blank" class="text-rose-600 hover:underline">Search NPO Listings</a>
+                </div>
+                <div>
+                    <span class="block font-bold text-gray-700 mb-1">Numazu Shakyo</span>
+                    <span class="text-gray-600">055-922-1500</span>
+                </div>
+                <div>
+                    <span class="block font-bold text-gray-700 mb-1">Susono V-Center</span>
+                    <span class="text-gray-600">055-992-5750</span>
+                </div>
+                <div>
+                    <span class="block font-bold text-gray-700 mb-1">Nagaizumi Shakyo</span>
+                    <span class="text-gray-600">055-988-3920</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div x-cloak x-show="modalOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            
+            <div x-show="modalOpen" x-transition.opacity class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeModal"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div x-show="modalOpen" 
+                 x-transition:enter="ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                 x-transition:leave="ease-in duration-200" 
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                 class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-2xl leading-6 font-bold text-gray-900" id="modal-title" x-text="activeItem.title"></h3>
+                        <button @click="closeModal" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                            <i class="fa-solid fa-xmark text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-4 border-t border-gray-100 pt-4">
+                        <div class="flex items-center space-x-4 mb-6 text-sm">
+                            <span class="text-rose-600 font-semibold uppercase tracking-wider bg-rose-50 px-2 py-1 rounded" x-text="activeItem.city"></span>
+                            <span class="text-gray-600"><i class="fa-regular fa-calendar mr-1"></i> <span x-text="activeItem.date"></span></span>
+                        </div>
+
+                        <h4 class="font-bold text-gray-900 mb-2">Core Task Analysis</h4>
+                        <ul class="list-disc pl-5 mb-6 text-gray-600 text-sm space-y-1">
+                            <template x-for="task in activeItem.tasks">
+                                <li x-text="task"></li>
+                            </template>
+                        </ul>
+
+                        <h4 class="font-bold text-gray-900 mb-2">Targeted Learning Outcomes (LOs)</h4>
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <template x-for="outcome in activeItem.outcomes">
+                                <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded" x-text="outcome"></span>
+                            </template>
+                        </div>
+
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+                            <h4 class="font-bold text-blue-800 text-sm mb-1"><i class="fa-solid fa-pen-nib mr-1"></i> Suggested Reflection Prompt</h4>
+                            <p class="text-sm text-blue-900 italic" x-text="activeItem.reflection"></p>
+                        </div>
+                        
+                        <div class="mt-4 flex flex-col md:flex-row md:items-center justify-between">
+                            <p class="text-xs text-gray-500 font-semibold mb-2 md:mb-0">Source/Contact: <span x-text="activeItem.contact" class="font-normal"></span></p>
+                            <a :href="activeItem.url" target="_blank" class="text-sm bg-rose-100 text-rose-700 hover:bg-rose-200 px-4 py-2 rounded font-bold transition">
+                                <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Official Link
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-800 text-base font-medium text-white hover:bg-gray-900 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm" @click="closeModal">
+                        Close Detail View
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+        function casApp() {
+            return {
+                filters: {
+                    city: 'All',
+                    strand: 'All'
+                },
+                modalOpen: false,
+                activeItem: {},
+                activities: [
+                    {
+                        id: 1,
+                        title: 'Ose Festival Support',
+                        city: 'Numazu',
+                        strand: ['Activity', 'Service'],
+                        date: 'April 4, 2026',
+                        description: 'Assisting in the logistics and execution of the traditional maritime festival heralding the arrival of spring in Suruga Bay.',
+                        tasks: ['Crowd control and visitor guidance around the shrine', 'Assisting local neighborhood associations with heavy equipment', 'Facilitating safe coastal operations'],
+                        outcomes: ['Collaborative Execution', 'Planning and Initiative', 'Global Engagement'],
+                        reflection: 'How does participating in a highly historical, labor-intensive ritual foster a deeper sense of place and regional continuity?',
+                        contact: 'Numazu City / Ose Shrine',
+                        url: 'https://southnumazu.jp/read/ose-festival/'
+                    },
+                    {
+                        id: 2,
+                        title: 'Groundwork Mishima Agricultural Support',
+                        city: 'Mishima',
+                        strand: ['Activity', 'Service'],
+                        date: 'April 4, 2026',
+                        description: 'Engaging in local agricultural initiatives aimed at preserving farming knowledge and addressing systemic farmland abandonment.',
+                        tasks: ['Physical agricultural labor', 'Assisting in farmland preservation'],
+                        outcomes: ['Collaborative Execution', 'Global Engagement'],
+                        reflection: 'What are the global implications of local food security and rural agricultural abandonment (kousakuhokichi)?',
+                        contact: 'Groundwork Mishima NPO',
+                        url: 'http://www.gwmishima.jp/'
+                    },
+                    {
+                        id: 3,
+                        title: 'Hiragana Tamago Class Mentor',
+                        city: 'Fuji City',
+                        strand: ['Service'],
+                        date: 'March 1, 8, 15, 2026',
+                        description: 'Assisting foreign-born children transitioning into the Japanese elementary school system before the academic year commences in April.',
+                        tasks: ['Teaching basic Hiragana', 'Providing mentorship and classroom support'],
+                        outcomes: ['Global Engagement', 'Ethical Choices', 'Collaborative Execution'],
+                        reflection: 'How does linguistic support mitigate the severe long-term academic marginalization of immigrant children?',
+                        contact: 'Fuji City International Exchange Lounge (FILS)',
+                        url: 'https://www.city.fuji.shizuoka.jp/documents/3316/fils.pdf'
+                    },
+                    {
+                        id: 4,
+                        title: 'Youth Volunteer Training Course',
+                        city: 'Nagaizumi',
+                        strand: ['Creativity', 'Service'],
+                        date: 'Flexible Spring 2026',
+                        description: 'A preparatory course utilizing specialized recreation techniques to teach the interpersonal skills necessary for effective volunteering.',
+                        tasks: ['Learning interpersonal methodologies', 'Practicing communication recreation techniques'],
+                        outcomes: ['Planning and Initiative', 'Collaborative Execution'],
+                        reflection: 'Why is developing specific interpersonal methodologies just as critical as raw enthusiasm when volunteering with vulnerable populations?',
+                        contact: 'Nagaizumi Town Council of Social Welfare',
+                        url: 'https://www.nagaizumi-shakyo.jp/'
+                    },
+                    {
+                        id: 5,
+                        title: 'SRG (Town Revitalization Group)',
+                        city: 'Susono',
+                        strand: ['Creativity', 'Service'],
+                        date: 'Flexible / Ongoing',
+                        description: 'A highly autonomous, student-led organization dedicated to town revitalization, independent event planning, and protecting community spaces.',
+                        tasks: ['Ideating and executing community events', 'Protecting local community exchange spaces'],
+                        outcomes: ['Planning and Initiative', 'Collaborative Execution', 'Ethical Choices', 'Global Engagement'],
+                        reflection: 'How does operating within a highly autonomous, lateral student organization differ from passive, top-down volunteering?',
+                        contact: 'Susono City Social Welfare Council',
+                        url: 'http://www.syakyo-susono.or.jp/'
+                    },
+                    {
+                        id: 6,
+                        title: 'ASEAN Youth Summit 2026',
+                        city: 'Remote',
+                        strand: ['Creativity'],
+                        date: 'March 30 - April 2, 2026',
+                        description: 'Rigorous policy formulation, diplomatic strategy, and live debate with high school students representing 11 Southeast Asian nations.',
+                        tasks: ['Geopolitical research', 'Complex policy drafting', 'Cross-cultural debate'],
+                        outcomes: ['Global Engagement', 'Ethical Choices', 'Collaborative Execution'],
+                        reflection: 'How did engaging in live diplomatic debate with international stakeholders challenge your own preconceptions of policy-making?',
+                        contact: 'NPO MIS / Qulii',
+                        url: 'https://qulii.jp/'
+                    },
+                    {
+                        id: 7,
+                        title: 'Toda River Sakura Light-up',
+                        city: 'Numazu',
+                        strand: ['Activity', 'Service'],
+                        date: 'March 20 - April 5, 2026',
+                        description: 'Supporting the aesthetic design, technical setup, and operations of the regional cherry blossom illumination event along the Toda River.',
+                        tasks: ['Assisting with the aesthetic placement of illumination equipment', 'Managing event logistics for evening crowds', 'Navigating complex public transit to an isolated peninsula site'],
+                        outcomes: ['Planning and Initiative', 'Commitment and Perseverance', 'Collaborative Execution'],
+                        reflection: 'What specific logistical skills did you develop by overcoming the significant transportation friction to reach the Toda district?',
+                        contact: 'Numazu Tourism / Activo',
+                        url: 'https://activo.jp/'
+                    },
+                    {
+                        id: 8,
+                        title: 'Library Audio Translation',
+                        city: 'Mishima',
+                        strand: ['Creativity', 'Service'],
+                        date: 'Orientation: April 15, 2026',
+                        description: 'Translating and recording printed municipal and literary materials into audio formats to support visually impaired patrons.',
+                        tasks: ['Translating printed documents', 'Recording audio files accurately'],
+                        outcomes: ['Global Engagement', 'Ethical Choices'],
+                        reflection: 'How does producing highly precise audio translations improve civic accessibility for marginalized populations?',
+                        contact: 'Mishima City Library',
+                        url: 'https://www.lib.mishima.shizuoka.jp/'
+                    }
+                ],
+                
+                get filteredActivities() {
+                    return this.activities.filter(activity => {
+                        const cityMatch = this.filters.city === 'All' || activity.city === this.filters.city;
+                        const strandMatch = this.filters.strand === 'All' || activity.strand.includes(this.filters.strand);
+                        return cityMatch && strandMatch;
+                    });
+                },
+
+                openModal(item) {
+                    this.activeItem = item;
+                    this.modalOpen = true;
+                    document.body.style.overflow = 'hidden';
+                },
+                
+                closeModal() {
+                    this.modalOpen = false;
+                    setTimeout(() => { this.activeItem = {}; }, 300);
+                    document.body.style.overflow = 'auto';
+                },
+
+                resetFilters() {
+                    this.filters.city = 'All';
+                    this.filters.strand = 'All';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Online CAS Navigator: Spring 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0B0C10; /* Midnight */
+            color: #C5C6C7;
+        }
+       .neon-mint-text { color: #66FCF1; }
+       .neon-mint-border { border-color: #66FCF1; }
+       .glass-panel {
+            background: rgba(31, 40, 51, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(102, 252, 241, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+       .glass-panel:hover {
+            border-color: rgba(102, 252, 241, 0.8);
+            box-shadow: 0 0 15px rgba(102, 252, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+       .tag-creativity { background-color: #FFC107; color: #000; }
+       .tag-activity { background-color: #29B6F6; color: #000; }
+       .tag-service { background-color: #66FCF1; color: #000; }
+       .tag-hybrid { background: linear-gradient(45deg, #FFC107, #66FCF1); color: #000; }
+    </style>
+</head>
+<body class="min-h-screen p-6" x-data="casApp()">
+
+    <header class="max-w-6xl mx-auto mb-12 text-center">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Global Online CAS Navigator</h1>
+        <h2 class="text-2xl neon-mint-text mb-8">March - April 2026 Edition</h2>
+        
+        <div class="glass-panel rounded-xl p-6 mx-auto max-w-2xl">
+            <h3 class="text-xl font-semibold mb-4 text-white">Verified Opportunities by Global Theme</h3>
+            <canvas id="themeChart" width="400" height="200"></canvas>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-white">Spring 2026 Opportunity Grid</h3>
+            <select x-model="filterStrand" class="bg-gray-800 text-white border border-gray-600 rounded px-4 py-2">
+                <option value="All">All Strands</option>
+                <option value="Creativity">Creativity</option>
+                <option value="Activity">Activity</option>
+                <option value="Service">Service</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <template x-for="task in filteredTasks" :key="task.id">
+                <div class="glass-panel rounded-xl p-6 flex flex-col cursor-pointer" @click="openModal(task)">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-sm font-bold px-2 py-1 rounded" :class="task.tagClass" x-text="task.strand"></span>
+                        <span class="text-xs text-gray-400" x-text="task.date"></span>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-2" x-text="task.title"></h4>
+                    <p class="text-sm neon-mint-text mb-3" x-text="task.org"></p>
+                    <p class="text-sm flex-grow mb-4" x-text="task.summary"></p>
+                    <button class="mt-auto border neon-mint-border neon-mint-text rounded py-2 hover:bg-[#66FCF1] hover:text-black transition">Analyze Task</button>
+                </div>
+            </template>
+        </div>
+    </main>
+
+    <div x-show="isModalOpen" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="glass-panel rounded-xl p-8 max-w-2xl w-full relative" @click.away="closeModal()">
+            <button @click="closeModal()" class="absolute top-4 right-4 text-white hover:text-[#66FCF1] text-2xl">&times;</button>
+            <h2 class="text-3xl font-bold text-white mb-2" x-text="activeTask.title"></h2>
+            <h3 class="text-xl neon-mint-text mb-6" x-text="activeTask.org"></h3>
+            
+            <div class="mb-6">
+                <h4 class="font-bold text-white mb-2">Core Task Analysis</h4>
+                <p class="text-sm text-gray-300" x-text="activeTask.description"></p>
+            </div>
+            
+            <div class="mb-6">
+                <h4 class="font-bold text-white mb-2">IB Learning Outcomes</h4>
+                <p class="text-sm text-gray-300" x-text="activeTask.lo"></p>
+            </div>
+
+            <div class="bg-gray-800 rounded p-4 border-l-4 neon-mint-border mb-4">
+                <h4 class="font-bold text-white mb-1">Digital Reflection Prompt</h4>
+                <p class="text-sm italic text-gray-300" x-text="activeTask.prompt"></p>
+            </div>
+            
+            <a :href="activeTask.url" target="_blank" class="mt-4 inline-block bg-[#66FCF1] text-black font-bold py-2 px-6 rounded hover:bg-white transition text-center w-full md:w-auto">
+                Visit Official Platform ↗
+            </a>
+        </div>
+    </div>
+
+<script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('casApp', () => ({
+                filterStrand: 'All',
+                isModalOpen: false,
+                activeTask: {},
+                tasks: [
+                    {
+                        id: 1,
+                        title: 'Missing Maps: Humanitarian Mapping',
+                        org: 'Red Cross & Doctors Without Borders',
+                        date: 'Ongoing / Spring 2026',
+                        strand: 'Hybrid',
+                        tagClass: 'tag-hybrid',
+                        summary: 'Trace satellite imagery to help humanitarian organizations reach vulnerable populations.',
+                        description: 'Using OpenStreetMap, volunteers mark off buildings, roads, and structures on satellite images. This creates accessible map data for humanitarian organizations to plan risk reduction and disaster response in areas previously "missing" from the map.',
+                        lo: 'LO6 (Global Significance), LO7 (Ethical Choices)',
+                        prompt: 'How does contributing to an open-source mapping database challenge traditional notions of who "owns" and produces geographical data?',
+                        url: 'https://www.missingmaps.org/'
+                    },
+                    {
+                        id: 2,
+                        title: 'Charity Miles Fitness Challenge',
+                        org: 'Charity Miles App',
+                        date: 'Spring 2026',
+                        strand: 'Activity',
+                        tagClass: 'tag-activity',
+                        summary: 'Turn your daily walking, running, or cycling workouts into corporate sponsorships for charity.',
+                        description: 'Use the Charity Miles app to track your physical movement. Corporate sponsors donate money to a charity of your choice (like ASPCA, Habitat for Humanity, or Stand Up To Cancer) based on the distance you cover.',
+                        lo: 'LO1 (Strength & Growth), LO4 (Commitment)',
+                        prompt: 'How did the gamification and digital tracking of your physical endurance alter your personal motivation over the 4-week period?',
+                        url: 'https://charitymiles.org/'
+                    },
+                    {
+                        id: 3,
+                        title: 'Amnesty Decoders: Human Rights Research',
+                        org: 'Amnesty International',
+                        date: 'Ongoing / Spring 2026',
+                        strand: 'Service',
+                        tagClass: 'tag-service',
+                        summary: 'Use your computer or phone to help researchers sift through pictures, info, and documents.',
+                        description: 'Join a global network of digital volunteers helping Amnesty International research and expose human rights violations. You will be tasked with identifying significant changes in satellite imagery, analyzing documents, or flagging social media data.',
+                        lo: 'LO6 (Global Significance), LO7 (Ethical Choices)',
+                        prompt: 'Discuss the emotional and ethical weight of verifying potential human rights abuses remotely through digital media.',
+                        url: 'https://decoders.amnesty.org/'
+                    },
+                    {
+                        id: 4,
+                        title: 'Virtual English Tutor for Refugees',
+                        org: 'Paper Airplanes',
+                        date: 'Starts April/May 2026',
+                        strand: 'Service',
+                        tagClass: 'tag-service',
+                        summary: 'Provide free, virtual, one-on-one language instruction to people affected by conflict.',
+                        description: 'Paper Airplanes uses video conferencing to match volunteer tutors with conflict-affected students (mostly from the Middle East and North Africa). Provide personalized instruction to help learners apply to universities or enter the job market.',
+                        lo: 'LO5 (Collaboration), LO6 (Global Significance)',
+                        prompt: 'Examine the emotional intelligence required to maintain engaging cross-cultural instruction in a virtual environment.',
+                        url: 'https://www.paper-airplanes.org/'
+                    },
+                    {
+                        id: 5,
+                        title: 'Global Remote Skills Volunteering',
+                        org: 'UN Volunteers (UNV)',
+                        date: 'Flexible Spring 2026',
+                        strand: 'Hybrid',
+                        tagClass: 'tag-hybrid',
+                        summary: 'Complete short-term digital tasks—from graphic design to translation—for UN agencies worldwide.',
+                        description: 'The UNV Online Volunteering service connects individuals with UN agencies, funds, programs, and NGOs to tackle global challenges. Tasks range from data analysis, translating documents, designing logos, to conducting research.',
+                        lo: 'LO2 (New Skills), LO6 (Global Significance)',
+                        prompt: 'How did utilizing your specific technical skills (e.g., translation, design) for an international agency redefine your understanding of "service"?',
+                        url: 'https://app.unv.org/'
+                    },
+                    {
+                        id: 6,
+                        title: 'Cloudspotting on Mars: Shapes',
+                        org: 'Zooniverse / Planetary Science',
+                        date: 'Spring 2026',
+                        strand: 'Creativity',
+                        tagClass: 'tag-creativity',
+                        summary: 'Identify Martian cloud formations to help model planetary climates.',
+                        description: 'Analyze real telescope data from the Mars Atmosphere and Volatile EvolutioN spacecraft to identify distinct water-ice and carbon-dioxide cloud formations. Your classifications directly help scientists model Martian climate feedback loops.',
+                        lo: 'LO2 (New Skills), LO6 (Global Significance)',
+                        prompt: 'How did contributing to actual planetary climate modeling shift your perspective on open-source data analysis?',
+                        url: 'https://www.zooniverse.org/projects/matteocrismani/cloudspotting-on-mars-shapes'
+                    },
+                    {
+                        id: 7,
+                        title: 'Notes from Nature - ROM Revealed',
+                        org: 'Zooniverse / Royal Ontario Museum',
+                        date: 'Spring 2026',
+                        strand: 'Service',
+                        tagClass: 'tag-service',
+                        summary: 'Transcribe historical specimen labels to track global biodiversity.',
+                        description: 'Digitize historical, handwritten specimen labels of insects and plants from the Royal Ontario Museum. Your transcriptions are sent to the Global Biodiversity Information Facility to track ecosystem changes and guide conservation efforts.',
+                        lo: 'LO4 (Commitment & Perseverance), LO6 (Global Significance)',
+                        prompt: 'Discuss the importance of preserving historical biodiversity data for modern environmental researchers.',
+                        url: 'https://www.zooniverse.org/projects/md68135/notes-from-nature-natural-history-at-rom-revealed'
+                    },
+                    {
+                        id: 8,
+                        title: 'The Senses of Stories',
+                        org: 'Zooniverse / McGill University',
+                        date: 'Spring 2026',
+                        strand: 'Creativity',
+                        tagClass: 'tag-creativity',
+                        summary: 'Analyze literary sentences for sensory language to train models.',
+                        description: 'Help an international university coalition study how literature invokes the senses. You will be tasked with rating sentences from fiction and nonfiction based on imageability, concreteness, and sensory immersion.',
+                        lo: 'LO2 (New Skills), LO7 (Ethical Choices)',
+                        prompt: 'Reflect on the intersection of human humanities and data analysis in this literary classification exercise.',
+                        url: 'https://www.zooniverse.org/projects/citizenreaders/the-senses-of-stories'
+                    }
+                ],
+                get filteredTasks() {
+                    if (this.filterStrand === 'All') return this.tasks;
+                    return this.tasks.filter(t => t.strand === this.filterStrand || t.strand === 'Hybrid');
+                },
+                openModal(task) {
+                    this.activeTask = task;
+                    this.isModalOpen = true;
+                },
+                closeModal() {
+                    this.isModalOpen = false;
+                    setTimeout(() => { this.activeTask = {}; }, 300);
+                }
+            }));
+
+            setTimeout(() => {
+                const ctx = document.getElementById('themeChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Creativity', 'Activity', 'Service', 'Hybrid'],
+                        datasets: [{
+                            data: [2, 1, 3, 2],
+                            backgroundColor: ['#FFC107', '#29B6F6', '#66FCF1', '#a855f7'],
+                            borderColor: '#0B0C10',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'right', labels: { color: '#C5C6C7' } }
+                        }
+                    }
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>
